@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:id="@+id/backgroundSettings"
+    >
+
+    <TextView
+        android:id="@+id/textViewSettings0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/settings_horizontal_margin"
+        android:layout_marginTop="@dimen/settings_vertical_margin"
+        android:text="Night Mode"
+        android:textSize="@dimen/settings_font_size"/>
+    <Switch
+        android:id="@+id/switch0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_alignTop="@id/textViewSettings0"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/settings_vertical_margin"/>
+
+    <TextView
+        android:id="@+id/textViewSettings1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_below="@id/textViewSettings0"
+        android:layout_marginStart="@dimen/settings_horizontal_margin"
+        android:layout_marginTop="@dimen/settings_vertical_margin"
+
+        android:text="Large Font Mode"
+        android:textSize="@dimen/settings_font_size"/>
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_alignTop="@id/textViewSettings1"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/settings_vertical_margin"/>
+
+    <TextView
+        android:id="@+id/textViewSettings2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_below="@id/textViewSettings1"
+        android:layout_marginStart="@dimen/settings_horizontal_margin"
+        android:layout_marginTop="@dimen/settings_vertical_margin"
+
+        android:text="Settings"
+        android:textSize="@dimen/settings_font_size"/>
+
+    <Switch
+        android:id="@+id/switch2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_alignTop="@id/textViewSettings2"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/settings_vertical_margin"/>
+
+</RelativeLayout>
