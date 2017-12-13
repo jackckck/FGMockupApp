@@ -3,6 +3,7 @@ package com.fewgamers.fgmockup;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
     }
 
-    public void executeFragmentTransaction(Fragment fragment){
+    public void executeFragmentTransaction(Fragment fragment) {
         if (fragment != null) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.MyFrameLayout, fragment);
@@ -124,27 +125,39 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         Fragment fragment = null;
 
-        if (id == R.id.action_exit0 || id == R.id.action_exit1){
+        if (id == R.id.action_exit0 || id == R.id.action_exit1) {
+            finish();
+        } else if (id == R.id.action_settings0 || id == R.id.action_settings1) {
+            fragment = new FragSettings();
+        } else if (id == R.id.action_profile) {
+            fragment = new FragProfile();
+        } else if (id == R.id.action_logOut) {
+            logOut();
+        }
+
+            executeFragmentTransaction(fragment);
+
+            return super.onOptionsItemSelected(item);
+        }
+
+        // kijkt welke item is aangeklikt. in DisplayFragment wordt het meeste werk gedaan.
+        @SuppressWarnings("StatementWithEmptyBody")
+        @Override
+        public boolean onNavigationItemSelected (MenuItem item){
+
+            DisplayFragment(item.getItemId());
+            return true;
+        }
+
+        private void logOut() {
+            SharedPreferences loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+            SharedPreferences.Editor loginEditor = loginSharedPreferences.edit();
+
+            loginEditor.putBoolean("stayLogged", false);
+            loginEditor.commit();
+
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
         }
-        else if (id == R.id.action_settings0 || id == R.id.action_settings1){
-            fragment = new FragSettings();
-        }
-        else if (id == R.id.action_profile){
-            fragment = new FragProfile();
-        }
-
-        executeFragmentTransaction(fragment);
-
-        return super.onOptionsItemSelected(item);
     }
-
-    // kijkt welke item is aangeklikt. in DisplayFragment wordt het meeste werk gedaan.
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-
-        DisplayFragment(item.getItemId());
-        return true;
-    }
-}

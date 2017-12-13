@@ -36,21 +36,14 @@ public class LoginActivity extends AppCompatActivity {
         loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
         loginEditor = loginSharedPreferences.edit();
 
+        if (loginSharedPreferences.getBoolean("stayLogged", false)) {
+            allowAccess();
+        }
+
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkLogin();
-            }
-        });
-
-        check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                loginEditor.putBoolean("stayLoggedCheck", isChecked);
-                if (isChecked == false) {
-                    loginEditor.putBoolean("stayLogged", false);
-                }
-                loginEditor.apply();
             }
         });
     }
@@ -59,13 +52,10 @@ public class LoginActivity extends AppCompatActivity {
         name = userName.getText().toString();
         pass = password.getText().toString();
 
-        if (loginSharedPreferences.getBoolean("stayLogged", false)) {
-            allowAccess();
-        }
-
-        if (name.equals("jack") && pass.equals("FewGamers")) {
-            if (loginSharedPreferences.getBoolean("stayLoggedCheck", false)) {
+        if ((name.equals("jack") || name.equals("luuk")) && pass.equals("FewGamers")) {
+            if (check.isChecked()) {
                 loginEditor.putBoolean("stayLogged", true);
+                loginEditor.commit();
             }
             allowAccess();
         }

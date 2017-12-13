@@ -20,6 +20,10 @@
         android:title="Settings"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_logOut"
+        android:title="Log out"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_exit1"
         android:title="Exit"
         app:showAsAction="never" />
