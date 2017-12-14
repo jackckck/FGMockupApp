@@ -18,7 +18,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
+
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -30,12 +39,17 @@ public class FragServerBrowser extends ListFragment {
     ArrayList<String> serverList = new ArrayList<String>();
 
     ArrayAdapter<String> serverAdapter;
-    
+
+    public FragServerBrowser() throws NoSuchPaddingException, NoSuchAlgorithmException {
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragserverbrowser, container, false);
     }
+
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
