@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FGMockup.iml" filepath="$PROJECT_DIR$/FGMockup.iml" />
+      <module fileurl="file://C:\Users\Luuk\Desktop\FGMockupApp\FGMockupApp\FGMockup.iml" filepath="C:\Users\Luuk\Desktop\FGMockupApp\FGMockupApp\FGMockup.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/FGMockupApp.iml" filepath="$PROJECT_DIR$/.idea/FGMockupApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
