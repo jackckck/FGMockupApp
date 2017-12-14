@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -30,7 +36,7 @@ public class FragServerBrowser extends ListFragment {
     ArrayList<String> serverList = new ArrayList<String>();
 
     ArrayAdapter<String> serverAdapter;
-    
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -45,10 +51,13 @@ public class FragServerBrowser extends ListFragment {
 
         makeStringRequest(requestQueue, "http://www.fewgamers.com/api.php");
 
+        serverList = makeServerList("[{\"game\":\"counterstrike\",\"server\":\"mirage\",\"player\":\"10/10\",\"ip\":\"0.0.0.0\"}]");
+
         serverAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, serverList);
         setListAdapter(serverAdapter);
 
         super.onViewCreated(view, savedInstanceState);
+
     }
 
     private void makeStringRequest(RequestQueue queue, String url) {
@@ -68,5 +77,28 @@ public class FragServerBrowser extends ListFragment {
         });
 
         queue.add(stringRequest);
+    }
+
+    private ArrayList<String> makeServerList(String s) {
+        JSONArray jsonArray = null;
+        ArrayList<String> resList = new ArrayList<String>();
+        try {
+            jsonArray = new JSONArray(s);
+        } catch (JSONException exception) {
+            Log.e("Server list not found", "Something when loading server data");
+        }
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                ServerObject serverObject = new ServerObject();
+
+                serverObject.defineServer(jsonArray.getJSONObject(i));
+                resList.add(serverObject.game + serverObject.serverName + serverObject.playerCount + serverObject.ip);
+            } catch (JSONException exception) {
+                Log.e("Server object missing", "Server object data incomplete");
+            }
+        }
+
+        return resList;
     }
 }

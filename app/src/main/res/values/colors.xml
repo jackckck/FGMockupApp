@@ -12,4 +12,6 @@
 
     <color name="fontColor">#898989</color>
     <color name="nightFontColor">#ffffff</color>
+
+    <color name="errorColor">#ff2d2d</color>
 </resources>

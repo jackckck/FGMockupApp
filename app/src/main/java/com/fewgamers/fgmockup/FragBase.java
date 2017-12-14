@@ -12,13 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 /**
  * Created by Administrator on 12/8/2017.
  */
 
 // een overkoepelende klasse voor alle fragments, wordt zelf niet geïmplementeerd
 
-public class FragBase extends Fragment{
+public class FragBase extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -82,5 +85,14 @@ public class FragBase extends Fragment{
         }
 
         return rl;
+    }
+
+    public JSONArray getJSONarrayFromString(String s) {
+        try {
+            JSONArray res = new JSONArray(s);
+            return res;
+        } catch (JSONException exception) {
+            throw new RuntimeException();
+        }
     }
 }

@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity
     // hetzelfde als de nav view, maar zonder een aparte methode in de body.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
+        // Handle action bar frienditem clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity
             return super.onOptionsItemSelected(item);
         }
 
-        // kijkt welke item is aangeklikt. in DisplayFragment wordt het meeste werk gedaan.
+        // kijkt welke frienditem is aangeklikt. in DisplayFragment wordt het meeste werk gedaan.
         @SuppressWarnings("StatementWithEmptyBody")
         @Override
         public boolean onNavigationItemSelected (MenuItem item){
