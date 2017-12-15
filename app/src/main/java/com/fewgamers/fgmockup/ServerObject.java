@@ -18,12 +18,27 @@ public class ServerObject {
     public void defineServer(JSONObject jsonObject) {
         try {
             this.game = jsonObject.getString("game");
-            this.serverName = jsonObject.getString("server");
-            this.playerCount = jsonObject.getString("player");
+            this.serverName = jsonObject.getString("serverName");
+            this.playerCount = jsonObject.getString("playercount");
             this.ip = jsonObject.getString("ip");
-        }
-        catch (JSONException j) {
+        } catch (JSONException j) {
             Log.e("Corrupt server", "Server data incomplete");
         }
+    }
+
+    public String getGame() {
+        return game;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public String getPlayerCount() {
+        return playerCount;
+    }
+
+    public String getIp() {
+        return ip;
     }
 }

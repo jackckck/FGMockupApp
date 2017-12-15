@@ -12,9 +12,36 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Loading data ..." />
+        android:text="Loading data ..."
+        android:visibility="invisible"/>
+
+    <EditText
+        android:id="@+id/serverSearchBar"
+        android:layout_width="match_parent"
+        android:layout_alignBottom="@id/serverSearchButton"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/fivedp"
+        android:layout_alignEnd="@id/sortingButton"
+        android:layout_marginEnd="44dp"
+        android:layout_marginTop="@dimen/fivedp"/>
+
+    <ImageButton
+        android:id="@+id/sortingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/serverSearchButton"
+        android:layout_alignTop="@id/serverSearchButton"
+        android:src="@drawable/ic_arrow_downward_black_24dp"/>
+
+    <ImageButton
+        android:id="@+id/serverSearchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_search_black_24dp"/>
 
     <ListView
+        android:layout_marginTop="35dp"
         android:id="@android:id/list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"></ListView>

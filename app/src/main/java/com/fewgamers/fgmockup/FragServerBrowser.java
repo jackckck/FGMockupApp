@@ -2,8 +2,11 @@ package com.fewgamers.fgmockup;
 
 import android.app.Fragment;
 import android.app.ListFragment;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +14,9 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -24,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,9 +40,16 @@ import java.util.List;
 // hier komt de server browser. momenteel maakt hij al contact met onze server, maar hij levert nog niets zinnigs op
 public class FragServerBrowser extends ListFragment {
 
-    ArrayList<String> serverList = new ArrayList<String>();
+    ArrayList<ServerObject> serverList, noFilterList;
 
-    ArrayAdapter<String> serverAdapter;
+    ServerListAdapter serverAdapter;
+
+    EditText searchBar;
+    ImageButton searchButton, sortingButton;
+
+    Boolean sortingDirectionIsDown = true;
+
+    Drawable upArrow, downArrow;
 
     @Nullable
     @Override
@@ -51,13 +65,67 @@ public class FragServerBrowser extends ListFragment {
 
         makeStringRequest(requestQueue, "http://www.fewgamers.com/api.php");
 
-        serverList = makeServerList("[{\"game\":\"counterstrike\",\"server\":\"mirage\",\"player\":\"10/10\",\"ip\":\"0.0.0.0\"}]");
+        String jsonString = "[{\"game\":\"CoD 2\",\"serverName\":\"Server One\",\"playercount\":\"8/10\",\"ip\":\"192.168.62.3\"},\n" +
+                "{\"game\":\"DoD\", \"serverName\":\"Server Two\",\"playercount\":\"9/22\",\"ip\":\"192.168.2.1\"},\n" +
+                "{\"game\":\"SC:BW\", \"serverName\":\"Server Three\",\"playercount\":\"2/4\",\"ip\":\"190.68.1.0\"}]";
 
-        serverAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, serverList);
+        serverList = makeServerList(jsonString);
+        noFilterList = makeServerList(jsonString);
+
+        serverAdapter = new ServerListAdapter(getActivity(), serverList);
         setListAdapter(serverAdapter);
+
+        searchBar = (EditText) getActivity().findViewById(R.id.serverSearchBar);
+        searchButton = (ImageButton) getActivity().findViewById(R.id.serverSearchButton);
+
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                searchFilter(s.toString().toLowerCase());
+            }
+        });
+
+        sortingButton = (ImageButton) getActivity().findViewById(R.id.sortingButton);
+
+        sortingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sortingDirectionIsDown) {
+                    sortingButton.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+                    sortingDirectionIsDown = false;
+                }
+                else {
+                    sortingButton.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                    sortingDirectionIsDown = true;
+                }
+                Collections.reverse(serverList);
+                serverAdapter.notifyDataSetChanged();
+            }
+        });
 
         super.onViewCreated(view, savedInstanceState);
 
+    }
+
+    private void searchFilter(String search) {
+        serverAdapter.clear();
+
+        for (int i = 0; i < noFilterList.size(); i++) {
+            ServerObject so = noFilterList.get(i);
+            if (so.getServerName().toLowerCase().contains(search)) {
+                serverAdapter.add(so);
+            }
+        }
     }
 
     private void makeStringRequest(RequestQueue queue, String url) {
@@ -79,9 +147,9 @@ public class FragServerBrowser extends ListFragment {
         queue.add(stringRequest);
     }
 
-    private ArrayList<String> makeServerList(String s) {
+    private ArrayList<ServerObject> makeServerList(String s) {
         JSONArray jsonArray = null;
-        ArrayList<String> resList = new ArrayList<String>();
+        ArrayList<ServerObject> resList = new ArrayList<>();
         try {
             jsonArray = new JSONArray(s);
         } catch (JSONException exception) {
@@ -93,7 +161,7 @@ public class FragServerBrowser extends ListFragment {
                 ServerObject serverObject = new ServerObject();
 
                 serverObject.defineServer(jsonArray.getJSONObject(i));
-                resList.add(serverObject.game + serverObject.serverName + serverObject.playerCount + serverObject.ip);
+                resList.add(serverObject);
             } catch (JSONException exception) {
                 Log.e("Server object missing", "Server object data incomplete");
             }
