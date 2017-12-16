@@ -1,7 +1,11 @@
 package com.fewgamers.fgmockup;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.ListFragment;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -31,7 +36,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -39,8 +46,7 @@ import java.util.List;
 
 // hier komt de server browser. momenteel maakt hij al contact met onze server, maar hij levert nog niets zinnigs op
 public class FragServerBrowser extends ListFragment {
-
-    ArrayList<ServerObject> serverList, noFilterList;
+    ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
 
     ServerListAdapter serverAdapter;
 
@@ -48,6 +54,7 @@ public class FragServerBrowser extends ListFragment {
     ImageButton searchButton, sortingButton;
 
     Boolean sortingDirectionIsDown = true;
+    Boolean isSortedAlphabetically = true;
 
     Drawable upArrow, downArrow;
 
@@ -63,14 +70,17 @@ public class FragServerBrowser extends ListFragment {
         // requestview opgehaald.
         final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
-        makeStringRequest(requestQueue, "http://www.fewgamers.com/api.php");
+        //makeStringRequest(requestQueue, "http://www.fewgamers.com/api.php");
 
         String jsonString = "[{\"game\":\"CoD 2\",\"serverName\":\"Server One\",\"playercount\":\"8/10\",\"ip\":\"192.168.62.3\"},\n" +
                 "{\"game\":\"DoD\", \"serverName\":\"Server Two\",\"playercount\":\"9/22\",\"ip\":\"192.168.2.1\"},\n" +
                 "{\"game\":\"SC:BW\", \"serverName\":\"Server Three\",\"playercount\":\"2/4\",\"ip\":\"190.68.1.0\"}]";
 
-        serverList = makeServerList(jsonString);
-        noFilterList = makeServerList(jsonString);
+        Map<String, ArrayList<ServerObject>> m = makeServerList(jsonString);
+
+        serverListAlphabetical = makeServerList(jsonString).get("Alphabetical");
+        serverListByPlayers = makeServerList(jsonString).get("Alphabetical");
+        serverList = makeServerList(jsonString).get("Alphabetical");
 
         serverAdapter = new ServerListAdapter(getActivity(), serverList);
         setListAdapter(serverAdapter);
@@ -103,8 +113,7 @@ public class FragServerBrowser extends ListFragment {
                 if (sortingDirectionIsDown) {
                     sortingButton.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
                     sortingDirectionIsDown = false;
-                }
-                else {
+                } else {
                     sortingButton.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
                     sortingDirectionIsDown = true;
                 }
@@ -113,19 +122,60 @@ public class FragServerBrowser extends ListFragment {
             }
         });
 
-        super.onViewCreated(view, savedInstanceState);
+        sortingButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                pickSortingMethod();
 
+                return true;
+            }
+        });
+
+        super.onViewCreated(view, savedInstanceState);
     }
 
     private void searchFilter(String search) {
-        serverAdapter.clear();
+        ArrayList<ServerObject> referenceList;
+        if (isSortedAlphabetically) {
+            referenceList = serverListAlphabetical;
+        } else {
+            referenceList = serverListByPlayers;
+        }
 
-        for (int i = 0; i < noFilterList.size(); i++) {
-            ServerObject so = noFilterList.get(i);
+        serverList.clear();
+
+        for (ServerObject so : serverListAlphabetical) {
             if (so.getServerName().toLowerCase().contains(search)) {
-                serverAdapter.add(so);
+                serverList.add(so);
             }
         }
+        serverAdapter.notifyDataSetChanged();
+    }
+
+    private void pickSortingMethod() {
+        AlertDialog.Builder sortingBuilder = new AlertDialog.Builder(getActivity());
+        sortingBuilder.setTitle("Sort by ...")
+                .setPositiveButton("Server name", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setAlphabetical();
+                    }
+
+                })
+                .setNegativeButton("Live players", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setNumerical();
+                    }
+                });
+    }
+
+    private void setAlphabetical() {
+        isSortedAlphabetically = true;
+    }
+
+    private void setNumerical() {
+        isSortedAlphabetically = false;
     }
 
     private void makeStringRequest(RequestQueue queue, String url) {
@@ -147,26 +197,50 @@ public class FragServerBrowser extends ListFragment {
         queue.add(stringRequest);
     }
 
-    private ArrayList<ServerObject> makeServerList(String s) {
+    private Map<String, ArrayList<ServerObject>> makeServerList(String s) {
         JSONArray jsonArray = null;
-        ArrayList<ServerObject> resList = new ArrayList<>();
         try {
             jsonArray = new JSONArray(s);
         } catch (JSONException exception) {
             Log.e("Server list not found", "Something when loading server data");
         }
 
+        ArrayList<ServerObject> resAlphabetical = new ArrayList<>();
+        ArrayList<ServerObject> resNumerical = new ArrayList<>();
+
+        Integer succesCounter = 0;
+
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
                 ServerObject serverObject = new ServerObject();
-
                 serverObject.defineServer(jsonArray.getJSONObject(i));
-                resList.add(serverObject);
+
+                resAlphabetical.add(serverObject);
+
+                if (succesCounter > 0) {
+                    Integer soLivePlayer = serverObject.getLivePlayer();
+                    int j = succesCounter - 1;
+                    while (j > 0 && resNumerical.get(j).getLivePlayer() > soLivePlayer) {
+                        j--;
+                    }
+                    if (j == 0 && resNumerical.get(0).getLivePlayer() < soLivePlayer) {
+                        resNumerical.add(0, serverObject);
+                    } else {
+                        resNumerical.add(j + 1, serverObject);
+                    }
+                } else {
+                    resNumerical.add(serverObject);
+                }
+
+                succesCounter++;
             } catch (JSONException exception) {
                 Log.e("Server object missing", "Server object data incomplete");
             }
         }
 
-        return resList;
+        Map<String, ArrayList<ServerObject>> map = new HashMap<>();
+        map.put("Alphabetical", resAlphabetical);
+        map.put("Numerical", resNumerical);
+        return map;
     }
 }

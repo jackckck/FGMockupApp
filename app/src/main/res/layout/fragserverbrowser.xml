@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Loading data ..."
-        android:visibility="invisible"/>
+        android:text="Loading data ..." />
 
     <EditText
         android:id="@+id/serverSearchBar"

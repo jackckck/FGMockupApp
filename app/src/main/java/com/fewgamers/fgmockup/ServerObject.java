@@ -14,6 +14,8 @@ public class ServerObject {
     String serverName;
     String playerCount;
     String ip;
+    Integer livePlayer;
+    Integer maxPlayer;
 
     public void defineServer(JSONObject jsonObject) {
         try {
@@ -24,6 +26,9 @@ public class ServerObject {
         } catch (JSONException j) {
             Log.e("Corrupt server", "Server data incomplete");
         }
+        String[] playerCountStrings = playerCount.split("/");
+        livePlayer = Integer.parseInt(playerCountStrings[0]);
+        maxPlayer = Integer.parseInt(playerCountStrings[1]);
     }
 
     public String getGame() {
@@ -36,6 +41,14 @@ public class ServerObject {
 
     public String getPlayerCount() {
         return playerCount;
+    }
+
+    public Integer getLivePlayer() {
+        return livePlayer;
+    }
+
+    public Integer getMaxPlayer() {
+        return maxPlayer;
     }
 
     public String getIp() {
