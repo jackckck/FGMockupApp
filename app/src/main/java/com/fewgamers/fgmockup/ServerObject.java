@@ -10,12 +10,8 @@ import org.json.JSONObject;
  */
 
 public class ServerObject {
-    String game;
-    String serverName;
-    String playerCount;
-    String ip;
-    Integer livePlayer;
-    Integer maxPlayer;
+    private String game, serverName, playerCount, ip;
+    private Integer livePlayer, maxPlayer;
 
     public void defineServer(JSONObject jsonObject) {
         try {

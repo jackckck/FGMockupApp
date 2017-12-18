@@ -9,7 +9,7 @@
     android:paddingTop="@dimen/fivedp">
 
     <ImageView
-        android:id="@+id/serverIcon"
+        android:id="@+id/friendProfilePic"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_alignParentStart="true"
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/serverIcon"
         android:layout_marginTop="@dimen/fivedp"
-        android:layout_toEndOf="@id/serverIcon"
+        android:layout_toEndOf="@id/friendProfilePic"
         android:text="Friend name"
         android:textSize="@dimen/friend_font_size" />
 
@@ -32,11 +32,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/friendName"
         android:layout_marginTop="@dimen/fivedp"
-        android:layout_toEndOf="@id/serverIcon"
+        android:layout_toEndOf="@id/friendProfilePic"
         android:text="j.d.dejong@students.uu.nl"
         android:textSize="@dimen/server_font_size" />
 
     <TextView
+        android:id="@+id/friendStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"

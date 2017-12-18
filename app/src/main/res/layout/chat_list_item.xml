@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/themMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="@dimen/fifteendp"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:textSize="@dimen/chat_font_size" />
+
+    <TextView
+        android:id="@+id/themTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@id/themMessage"
+        android:layout_below="@id/themMessage"
+        android:layout_marginEnd="@dimen/fivedp" />
+
+    <TextView
+        android:id="@+id/usMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/fifteendp"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:textSize="@dimen/chat_font_size" />
+
+    <TextView
+        android:id="@+id/usTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@id/usMessage"
+        android:layout_below="@id/usMessage"
+        android:layout_marginEnd="@dimen/fivedp" />
+
+</RelativeLayout>

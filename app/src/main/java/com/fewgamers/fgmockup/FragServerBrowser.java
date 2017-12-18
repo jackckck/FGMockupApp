@@ -56,8 +56,6 @@ public class FragServerBrowser extends ListFragment {
     Boolean sortingDirectionIsDown = true;
     Boolean isSortedAlphabetically = true;
 
-    Drawable upArrow, downArrow;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -78,9 +76,9 @@ public class FragServerBrowser extends ListFragment {
 
         Map<String, ArrayList<ServerObject>> m = makeServerList(jsonString);
 
-        serverListAlphabetical = makeServerList(jsonString).get("Alphabetical");
-        serverListByPlayers = makeServerList(jsonString).get("Alphabetical");
-        serverList = makeServerList(jsonString).get("Alphabetical");
+        serverListAlphabetical = m.get("Alphabetical");
+        serverListByPlayers = m.get("Numerical");
+        serverList = new ArrayList<ServerObject>(m.get("Alphabetical"));
 
         serverAdapter = new ServerListAdapter(getActivity(), serverList);
         setListAdapter(serverAdapter);
@@ -137,14 +135,14 @@ public class FragServerBrowser extends ListFragment {
     private void searchFilter(String search) {
         ArrayList<ServerObject> referenceList;
         if (isSortedAlphabetically) {
-            referenceList = serverListAlphabetical;
+            referenceList = new ArrayList<ServerObject>(serverListAlphabetical);
         } else {
-            referenceList = serverListByPlayers;
+            referenceList = new ArrayList<ServerObject>(serverListByPlayers);
         }
 
         serverList.clear();
 
-        for (ServerObject so : serverListAlphabetical) {
+        for (ServerObject so : referenceList) {
             if (so.getServerName().toLowerCase().contains(search)) {
                 serverList.add(so);
             }
@@ -168,14 +166,18 @@ public class FragServerBrowser extends ListFragment {
                         setNumerical();
                     }
                 });
+        AlertDialog alertDialog = sortingBuilder.create();
+        alertDialog.show();
     }
 
     private void setAlphabetical() {
         isSortedAlphabetically = true;
+        searchFilter(searchBar.getText().toString().toLowerCase());
     }
 
     private void setNumerical() {
         isSortedAlphabetically = false;
+        searchFilter(searchBar.getText().toString().toLowerCase());
     }
 
     private void makeStringRequest(RequestQueue queue, String url) {
@@ -197,18 +199,18 @@ public class FragServerBrowser extends ListFragment {
         queue.add(stringRequest);
     }
 
-    private Map<String, ArrayList<ServerObject>> makeServerList(String s) {
+    private Map<String, ArrayList<ServerObject>> makeServerList(String jsonString) {
         JSONArray jsonArray = null;
         try {
-            jsonArray = new JSONArray(s);
+            jsonArray = new JSONArray(jsonString);
         } catch (JSONException exception) {
-            Log.e("Server list not found", "Something when loading server data");
+            Log.e("Server list not found", "Something went wrong when loading server data");
         }
 
         ArrayList<ServerObject> resAlphabetical = new ArrayList<>();
         ArrayList<ServerObject> resNumerical = new ArrayList<>();
 
-        Integer succesCounter = 0;
+        Integer successCounter = 0;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
@@ -217,22 +219,14 @@ public class FragServerBrowser extends ListFragment {
 
                 resAlphabetical.add(serverObject);
 
-                if (succesCounter > 0) {
-                    Integer soLivePlayer = serverObject.getLivePlayer();
-                    int j = succesCounter - 1;
-                    while (j > 0 && resNumerical.get(j).getLivePlayer() > soLivePlayer) {
-                        j--;
-                    }
-                    if (j == 0 && resNumerical.get(0).getLivePlayer() < soLivePlayer) {
-                        resNumerical.add(0, serverObject);
-                    } else {
-                        resNumerical.add(j + 1, serverObject);
-                    }
-                } else {
-                    resNumerical.add(serverObject);
-                }
+                Integer j = successCounter - 1;
 
-                succesCounter++;
+                while (j > -1 && resNumerical.get(j).getLivePlayer() < serverObject.getLivePlayer()) {
+                    j--;
+                }
+                resNumerical.add(j + 1, serverObject);
+
+                successCounter++;
             } catch (JSONException exception) {
                 Log.e("Server object missing", "Server object data incomplete");
             }

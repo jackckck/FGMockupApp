@@ -12,8 +12,10 @@
     <dimen name="settings_horizontal_spacing">100dp</dimen>
 
     <dimen name="fivedp">5dp</dimen>
+    <dimen name="fifteendp">15dp</dimen>
 
     <dimen name="settings_font_size">20sp</dimen>
     <dimen name="server_font_size">15sp</dimen>
     <dimen name="friend_font_size">20sp</dimen>
+    <dimen name="chat_font_size">18sp</dimen>
 </resources>
