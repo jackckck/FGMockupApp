@@ -10,7 +10,7 @@ import org.json.JSONObject;
  */
 
 public class ServerObject {
-    private String game, serverName, playerCount, ip;
+    private String game, serverName, playerCount, ip, userCreator;
     private Integer livePlayer, maxPlayer;
 
     public void defineServer(JSONObject jsonObject) {
@@ -19,6 +19,7 @@ public class ServerObject {
             this.serverName = jsonObject.getString("serverName");
             this.playerCount = jsonObject.getString("playercount");
             this.ip = jsonObject.getString("ip");
+            this.userCreator = jsonObject.getString("creator");
         } catch (JSONException j) {
             Log.e("Corrupt server", "Server data incomplete");
         }
@@ -49,5 +50,9 @@ public class ServerObject {
 
     public String getIp() {
         return ip;
+    }
+
+    public String getCreator() {
+        return userCreator;
     }
 }

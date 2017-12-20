@@ -25,10 +25,25 @@ public class FriendObject {
     public String getFriendName() {
         return friendName;
     }
+
     public String getFriendEMail() {
         return friendEMail;
     }
+
     public String getFriendStatus() {
         return friendStatus;
     }
+
+    public void setFriendName(String friendName) {
+        this.friendName = friendName;
+    }
+
+    public void setFriendEMail(String friendEMail) {
+        this.friendEMail = friendEMail;
+    }
+
+    public void setFriendStatus(String friendStatus) {
+        this.friendStatus = friendStatus;
+    }
+
 }

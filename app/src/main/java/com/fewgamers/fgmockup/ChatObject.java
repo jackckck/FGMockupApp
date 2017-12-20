@@ -15,42 +15,34 @@ import java.util.Date;
 
 public class ChatObject {
     private Date date;
-    private String message, user, dateString, timeOfDayString;
+    private String message, user;
     private String messageComesFomMe;
 
-    public void defineChatObject(JSONObject jsonObject) {
+    public void defineChatObject(String user, String message, String fromMe) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-        try {
-            this.message = jsonObject.getString("message");
-            this.user = jsonObject.getString("user");
-            this.messageComesFomMe = jsonObject.getString("fromMe");
-        } catch (JSONException exception) {
-            Log.e("Corrupt chat object", "Some chat data missing");
-        }
-    }
-
-    public Date getDate() {
-        return date;
+        this.user = user;
+        this.message = message;
+        this.messageComesFomMe = fromMe;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public String getDateString() {
-        return dateString;
-    }
-
-    public String getTimeOfDayString() {
-        return timeOfDayString;
-    }
-
     public String isMessageFromMe() {
         return messageComesFomMe;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setMessageComesFomMe(String fromMe) {
+        this.messageComesFomMe = fromMe;
     }
 }

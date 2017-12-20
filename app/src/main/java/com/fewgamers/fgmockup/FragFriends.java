@@ -10,10 +10,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -26,6 +34,11 @@ public class FragFriends extends ListFragment {
 
     FriendListAdapter friendAdapter;
 
+    RequestQueue friendRequestQueue;
+
+    String jsonString;
+    String thisUser = "FGfanboy";
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -34,17 +47,9 @@ public class FragFriends extends ListFragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        String jsonString = "[{\"name\":\"luuk123455\",\"email\":\"luuk123455@fewgamers.com\",\"status\":\"online\"},\n" +
-                "{\"name\":\"ValentijnvanZwieten\",\"email\":\"valentijnvanzwieten@fewgamers.com\",\"status\":\"online\"},\n" +
-                "{\"name\":\"Xander12345\",\"email\":\"xander12345@fewgamers.com\",\"status\":\"online\"},\n" +
-                "{\"name\":\"Craz1k0ek\",\"email\":\"crazikoek@fewgamers.com\",\"status\":\"away\"},\n" +
-                "{\"name\":\"koeninho\",\"email\":\"koeninho@fewgamers.com\",\"status\":\"away\"},\n" +
-                "{\"name\":\"jackckck\",\"email\":\"j.d.dejong@students.com\",\"status\":\"offline\"}]";
+        friendRequestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
-        friendList = makeFriendList(jsonString);
-
-        friendAdapter = new FriendListAdapter(getActivity(), friendList);
-        setListAdapter(friendAdapter);
+        makeStringRequest(friendRequestQueue, "http://fewgamers.com/api/userrelation/?uuid=ALL");
 
         super.onViewCreated(view, savedInstanceState);
     }
@@ -57,27 +62,53 @@ public class FragFriends extends ListFragment {
     }
 
     private ArrayList<FriendObject> makeFriendList(String jsonString) {
-        JSONArray jsonArray = null;
-        try {
-            jsonArray = new JSONArray(jsonString);
-        } catch (JSONException exception) {
-            Log.e("Friend list not found", "Something went wrong when loading friend data");
-        }
+        String[] jsonObjects = jsonString.split(".\n");
 
         ArrayList<FriendObject> res = new ArrayList<>();
 
-        for (int i = 0; i < jsonArray.length(); i++) {
+        for (String jsonObjectString : jsonObjects) {
             try {
                 FriendObject friendObject = new FriendObject();
-                friendObject.defineFriend(jsonArray.getJSONObject(i));
+                JSONObject jsonFriend = new JSONObject(jsonObjectString);
+
+                String userOne, userTwo;
+                userOne = jsonFriend.getString("user1");
+                userTwo = jsonFriend.getString("user2");
+                if (userOne.equals(thisUser)) {
+                    friendObject.setFriendName(userOne);
+                } else if (userTwo.equals(thisUser)) {
+                    friendObject.setFriendName(userTwo);
+                }
+
+                friendObject.setFriendEMail("test@test.nl");
+                friendObject.setFriendStatus("online");
 
                 res.add(friendObject);
-            }
-            catch (JSONException exception) {
+            } catch (JSONException exception) {
                 Log.e("Friend object missing", "Friend object data incomplete");
             }
         }
 
         return res;
+    }
+
+    private void makeStringRequest(RequestQueue queue, String url) {
+        final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                jsonString = response;
+                friendList = makeFriendList(jsonString);
+
+                friendAdapter = new FriendListAdapter(getActivity(), friendList);
+                setListAdapter(friendAdapter);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                jsonString = "error";
+            }
+        });
+
+        queue.add(stringRequest);
     }
 }

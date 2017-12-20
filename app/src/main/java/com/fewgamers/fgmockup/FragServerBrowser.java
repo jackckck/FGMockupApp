@@ -2,9 +2,11 @@ package com.fewgamers.fgmockup;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,9 +73,7 @@ public class FragServerBrowser extends ListFragment {
 
         //makeStringRequest(requestQueue, "http://www.fewgamers.com/api.php");
 
-        String jsonString = "[{\"game\":\"CoD 2\",\"serverName\":\"Server One\",\"playercount\":\"8/10\",\"ip\":\"192.168.62.3\"},\n" +
-                "{\"game\":\"DoD\", \"serverName\":\"Server Two\",\"playercount\":\"9/22\",\"ip\":\"192.168.2.1\"},\n" +
-                "{\"game\":\"SC:BW\", \"serverName\":\"Server Three\",\"playercount\":\"2/4\",\"ip\":\"190.68.1.0\"}]";
+        String jsonString = "[{\"game\":\"CoD 2\",\"serverName\":\"Server One\",\"playercount\":\"8/10\",\"ip\":\"192.168.62.3\",\"creator\":\"jack\"},{\"game\":\"DoD\", \"serverName\":\"Server Two\",\"playercount\":\"9/22\",\"ip\":\"192.168.2.1\",\"creator\":\"luuk\"},{\"game\":\"SC:BW\", \"serverName\":\"Server Three\",\"playercount\":\"2/4\",\"ip\":\"190.68.1.0\",\"creator\":\"jack\"}]";
 
         Map<String, ArrayList<ServerObject>> m = makeServerList(jsonString);
 
@@ -130,6 +131,20 @@ public class FragServerBrowser extends ListFragment {
         });
 
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        FragServerInfo fragment = new FragServerInfo();
+        fragment.setServer((ServerObject) l.getItemAtPosition(position));
+
+        if (fragment != null) {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.MyFrameLayout, fragment);
+            ft.commit();
+        }
     }
 
     private void searchFilter(String search) {
@@ -217,9 +232,14 @@ public class FragServerBrowser extends ListFragment {
                 ServerObject serverObject = new ServerObject();
                 serverObject.defineServer(jsonArray.getJSONObject(i));
 
-                resAlphabetical.add(serverObject);
-
                 Integer j = successCounter - 1;
+
+                while (j > - 1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
+                    j--;
+                }
+                resAlphabetical.add(j + 1, serverObject);
+
+                j = successCounter - 1;
 
                 while (j > -1 && resNumerical.get(j).getLivePlayer() < serverObject.getLivePlayer()) {
                     j--;
@@ -237,4 +257,6 @@ public class FragServerBrowser extends ListFragment {
         map.put("Numerical", resNumerical);
         return map;
     }
+
+
 }

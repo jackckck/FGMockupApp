@@ -12,9 +12,20 @@
         android:layout_height="wrap_content"></ListView>
 
     <EditText
-        android:layout_alignParentBottom="true"
+        android:id="@+id/messageEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Your message here ..."/>
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/sendFloatingActionButton"
+        android:hint="Your message here ..." />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/sendFloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:clickable="true"
+        android:src="@drawable/ic_menu_send" />
 
 </RelativeLayout>

@@ -33,17 +33,16 @@ public class ChatAdapter extends ArrayAdapter<ChatObject> {
 
         View resView = inflater.inflate(R.layout.chat_list_item, parent, false);
 
-
         TextView message, timeOfDay;
 
-        if (chatList.get(position).isMessageFromMe() == "true") {
+        if (chatList.get(position).isMessageFromMe().equals("true")) {
             message = (TextView) resView.findViewById(R.id.usMessage);
             timeOfDay = (TextView) resView.findViewById(R.id.themTime);
         } else {
             message = (TextView) resView.findViewById(R.id.themMessage);
             timeOfDay = (TextView) resView.findViewById(R.id.themTime);
         }
-        message.setText(chatList.get(position).isMessageFromMe());
+        message.setText(chatList.get(position).getMessage());
 
         return resView;
     }

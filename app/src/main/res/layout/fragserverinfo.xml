@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/serverInfoGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fifteendp"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:text="Game:" />
+
+    <TextView
+        android:id="@+id/serverInfoServerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoGame"
+        android:layout_below="@id/serverInfoGame"
+        android:text="Server name:" />
+
+    <TextView
+        android:id="@+id/serverInfoIPAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoGame"
+        android:layout_below="@id/serverInfoServerName"
+        android:text="IP address:" />
+
+    <TextView
+        android:id="@+id/serverInfoCreatorUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoGame"
+        android:layout_below="@id/serverInfoIPAddress"
+        android:text="Creator:" />
+
+
+    <TextView
+        android:id="@+id/serverInfoGameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoServerNameDisplay"
+        android:layout_alignTop="@id/serverInfoGame" />
+
+    <TextView
+        android:id="@+id/serverInfoServerNameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/serverInfoServerName"
+        android:layout_marginStart="@dimen/fivedp"
+        android:layout_toRightOf="@id/serverInfoServerName" />
+
+    <TextView
+        android:id="@+id/serverInfoIPAddressDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoServerNameDisplay"
+        android:layout_alignTop="@id/serverInfoIPAddress" />
+
+    <TextView
+        android:id="@+id/serverInfoCreatorUserDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoServerNameDisplay"
+        android:layout_alignTop="@id/serverInfoCreatorUser" />
+
+</RelativeLayout>
