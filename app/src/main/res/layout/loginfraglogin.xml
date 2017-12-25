@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background"
-    tools:context="com.fewgamers.fgmockup.LoginActivity">
+    android:layout_height="match_parent">
 
     <EditText
         android:id="@+id/userName"
@@ -47,11 +43,10 @@
         android:layout_marginTop="40dp"
         android:text="Login" />
 
-    <ImageButton
-        android:id="@+id/passwordVisibilityButton"
+    <TextView
+        android:id="@+id/loginErrorNotifier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/password"
-        android:layout_toRightOf="@id/password"
-        android:src="@drawable/ic_login_visibility_off" />
+        android:layout_below="@id/loginButton"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

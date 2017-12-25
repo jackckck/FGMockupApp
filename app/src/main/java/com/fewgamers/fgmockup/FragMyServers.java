@@ -7,11 +7,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.RequestQueue;
+
+import java.util.ArrayList;
+
 /**
  * Created by Administrator on 12/6/2017.
  */
 
-public class FragMyServers extends FragBase {
+public class FragMyServers extends ListFragBase {
+    ArrayList<ServerObject> myServersList;
+
+    ServerListAdapter myServersAdapter;
 
     @Nullable
     @Override
@@ -21,7 +28,8 @@ public class FragMyServers extends FragBase {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        changeBackGroundColor(getRelativeLayout("myServers"), nightModeCheck());
         super.onViewCreated(view, savedInstanceState);
+
+        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
     }
 }

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/registerFirstNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:text="First name"
+        android:textSize="@dimen/chat_font_size" />
+
+    <EditText
+        android:id="@+id/registerFirstNameEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerFirstNameText"
+        android:layout_centerHorizontal="true"
+        android:hint="Your first name" />
+
+    <TextView
+        android:id="@+id/registerLastName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerFirstNameEdit"
+        android:layout_centerHorizontal="true"
+        android:text="Last name"
+        android:textSize="@dimen/chat_font_size" />
+
+    <EditText
+        android:id="@+id/registerLastNameEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerLastName"
+        android:layout_centerHorizontal="true"
+        android:hint="Your last name" />
+
+    <TextView
+        android:id="@+id/registerEMailText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerLastNameEdit"
+        android:text="Email address*"
+        android:textSize="@dimen/chat_font_size" />
+
+    <EditText
+        android:id="@+id/registerEmailEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@+id/registerEMailText"
+        android:layout_centerHorizontal="true"
+        android:hint="Your email here" />
+
+    <TextView
+        android:id="@+id/registerUsernameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerEmailEdit"
+        android:text="Username*"
+        android:textSize="@dimen/chat_font_size" />
+
+    <EditText
+        android:id="@+id/registerUsernameEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerUsernameText"
+        android:layout_centerHorizontal="true"
+        android:hint="Your username here" />
+
+    <TextView
+        android:id="@+id/registerPasswordText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/registerPasswordEdit"
+        android:layout_below="@id/registerUsernameEdit"
+        android:text="Password*"
+        android:textSize="@dimen/chat_font_size" />
+
+
+    <EditText
+        android:id="@+id/registerPasswordEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/registerPasswordText"
+        android:layout_centerHorizontal="true"
+        android:hint="Your password here" />
+
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/registerPasswordEdit"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:text="Register" />
+
+</RelativeLayout>

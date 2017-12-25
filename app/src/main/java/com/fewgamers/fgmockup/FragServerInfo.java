@@ -41,10 +41,10 @@ public class FragServerInfo extends Fragment {
         thisServerIPDisplay = (TextView) getActivity().findViewById(R.id.serverInfoIPAddressDisplay);
         thisServerCreatorDisplay = (TextView) getActivity().findViewById(R.id.serverInfoCreatorUserDisplay);
 
-        setDisplayTexts();
+        setServerDisplayTexts();
     }
 
-    private void setDisplayTexts() {
+    private void setServerDisplayTexts() {
         thisGameDisplay.setText(thisGame);
         thisServerNameDisplay.setText(thisServerName);
         thisServerIPDisplay.setText(thisServerIP);

@@ -20,7 +20,7 @@
         android:id="@+id/friendName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/serverIcon"
+        android:layout_alignTop="@id/friendProfilePic"
         android:layout_marginTop="@dimen/fivedp"
         android:layout_toEndOf="@id/friendProfilePic"
         android:text="Friend name"

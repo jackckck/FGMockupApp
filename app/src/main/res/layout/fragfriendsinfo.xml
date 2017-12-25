@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/friendsInfoUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fifteendp"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:text="Username:" />
+
+    <TextView
+        android:id="@+id/friendsInfoEMail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/friendsInfoUsername"
+        android:layout_below="@id/friendsInfoUsername"
+        android:text="Email:" />
+
+    <TextView
+        android:id="@+id/friendsInfoFirstName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/friendsInfoEMail"
+        android:layout_below="@id/friendsInfoEMail"
+        android:layout_marginTop="@dimen/fifteendp"
+        android:text="First name:" />
+
+    <TextView
+        android:id="@+id/friendsInfoLastName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/friendsInfoFirstName"
+        android:layout_below="@id/friendsInfoFirstName"
+        android:text="Last name:" />
+
+    <TextView
+        android:id="@+id/friendsInfoUsernameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/friendsInfoUsername"
+        android:layout_marginStart="@dimen/fifteendp"
+        android:layout_toRightOf="@id/friendsInfoFirstName" />
+
+    <TextView
+        android:id="@+id/friendsInfoEMailDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/friendsInfoUsernameDisplay"
+        android:layout_below="@id/friendsInfoUsernameDisplay" />
+
+    <TextView
+        android:id="@+id/friendsInfoFirstNameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/friendsInfoUsernameDisplay"
+        android:layout_below="@id/friendsInfoEMailDisplay"
+        android:layout_marginTop="@dimen/fifteendp" />
+
+    <TextView
+        android:id="@+id/friendsInfoLastNameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/friendsInfoUsernameDisplay"
+        android:layout_below="@id/friendsInfoFirstNameDisplay" />
+</RelativeLayout>

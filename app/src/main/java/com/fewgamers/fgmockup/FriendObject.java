@@ -10,12 +10,34 @@ import org.json.JSONObject;
  */
 
 public class FriendObject {
-    private String friendName, friendEMail, friendStatus;
+    private String friendName, friendEMail, firstName, lastName, friendStatus;
+    private Boolean isFriend = false;
 
-    public void defineFriend(JSONObject jsonObject) {
+    public FriendObject() {
+        friendName = "";
+        friendEMail = "";
+        firstName = "";
+        lastName = "";
+        friendStatus = "";
+    }
+
+    public void defineFriend(JSONObject jsonObject, String myUsername) {
         try {
-            this.friendName = jsonObject.getString("name");
-            this.friendEMail = jsonObject.getString("email");
+            String userOne, userTwo;
+            userOne = jsonObject.getString("user1");
+            userTwo = jsonObject.getString("user2");
+
+            if (myUsername.equals(userOne)) {
+                this.friendName = userTwo;
+                this.isFriend = true;
+            } else if (myUsername.equals(userTwo)) {
+                this.friendName = userOne;
+                this.isFriend = true;
+            } else {
+                return;
+            }
+
+            //this.friendEMail = jsonObject.getString("email");
             this.friendStatus = jsonObject.getString("status");
         } catch (JSONException j) {
             Log.e("Corrupt friend", "Friend data incomplete");
@@ -32,6 +54,18 @@ public class FriendObject {
 
     public String getFriendStatus() {
         return friendStatus;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public Boolean isMyFriend() {
+        return isFriend;
     }
 
     public void setFriendName(String friendName) {

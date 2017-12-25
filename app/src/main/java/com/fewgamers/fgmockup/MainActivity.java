@@ -67,6 +67,10 @@ public class MainActivity extends AppCompatActivity
             Fragment fragment = new FragServerBrowser();
             executeFragmentTransaction(fragment);
         }
+        else if (f instanceof FragFriendsInfo) {
+            Fragment fragment = new FragFriends();
+            executeFragmentTransaction(fragment);
+        }
     }
 
     @Override

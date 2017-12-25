@@ -6,12 +6,17 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -19,6 +24,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+
+import org.w3c.dom.Text;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -35,13 +42,15 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText userName, password;
     Button login;
-    String name, pass, userKey, generalKey;
+    ImageButton visibility;
+    String name, pass, userKey, generalKey, iv;
+    Boolean passwordIsVisible;
     CheckBox check;
 
     SharedPreferences loginSharedPreferences;
     SharedPreferences.Editor loginEditor;
 
-    LoginCrypt loginCryptZero, loginCryptOne;
+    LoginCrypt loginCrypt;
 
     RequestQueue loginRequestQueue;
 
@@ -53,18 +62,21 @@ public class LoginActivity extends AppCompatActivity {
         userName = (EditText) findViewById(R.id.userName);
         password = (EditText) findViewById(R.id.password);
         login = (Button) findViewById(R.id.loginButton);
+        visibility = (ImageButton) findViewById(R.id.passwordVisibilityButton);
         check = (CheckBox) findViewById(R.id.loginCheck);
         userName.setText("");
         password.setText("");
 
-        userKey = "72C22E124DB9499C9FAA71CB501D273E";
-        generalKey = "0123456789abcdef";
+        passwordIsVisible = false;
+
+        userKey = "Game er s few123";
+        generalKey = "Fewg am er s1234";
+        iv = "";
 
         loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
         loginEditor = loginSharedPreferences.edit();
 
-        loginCryptZero = new LoginCrypt(userKey);
-        loginCryptOne = new LoginCrypt(generalKey);
+        loginCrypt = new LoginCrypt(generalKey, iv);
 
         loginRequestQueue = RequestSingleton.getInstance(this.getApplicationContext()).getRequestQueue();
 
@@ -87,6 +99,21 @@ public class LoginActivity extends AppCompatActivity {
                 checkLogin();
             }
         });
+
+        visibility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (passwordIsVisible) {
+                    passwordIsVisible = false;
+                    visibility.setImageResource(R.drawable.ic_login_visibility_off);
+                    password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                } else {
+                    passwordIsVisible = true;
+                    visibility.setImageResource(R.drawable.ic_login_visibility);
+                    password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                }
+            }
+        });
     }
 
     private void checkLogin() {
@@ -103,12 +130,11 @@ public class LoginActivity extends AppCompatActivity {
             password.setBackgroundColor(getResources().getColor(R.color.errorColor));
         }
 
-        String encryptedPass, loginJSONString, encryptedLoginJSONString;
+        String loginJSONString, encryptedLoginJSONString;
 
         try {
-            encryptedPass = loginCryptZero.byteArrayToHexString(loginCryptZero.encrypt(pass));
-            loginJSONString = makeLoginJSONString(name, encryptedPass, userKey);
-            encryptedLoginJSONString = loginCryptOne.byteArrayToHexString(loginCryptOne.encrypt(loginJSONString));
+            loginJSONString = makeLoginJSONString(name, pass);
+            encryptedLoginJSONString = loginCrypt.byteArrayToHexString(loginCrypt.encrypt(loginJSONString));
 
         } catch (Exception exception) {
             Log.e("Encryption method", "Something went wrong when calling encryption method");
@@ -119,29 +145,30 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void sendLoginRequest(final String string) {
-        StringRequest postRequest = new StringRequest(Request.Method.POST, " http://www.fewgamers.com/api/user/?uuid=ALL",
-                new Response.Listener<String>()
-                {
+        StringRequest postRequest = new StringRequest(Request.Method.POST, " http://www.fewgamers.com/api/login/",
+                new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         // response
                         Log.d("Response", response);
                     }
                 },
-                new Response.ErrorListener()
-                {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        //Log.d("Error.Response", error.getMessage());
+                        if (error.getMessage() != null) {
+                            Log.d("Error.Response", error.getMessage());
+                        } else {
+                            Log.d("Error.Response", "Indefinite error");
+                        }
                     }
                 }
         ) {
             @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Property name", string);
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("User data", string);
 
                 return params;
             }
@@ -149,9 +176,8 @@ public class LoginActivity extends AppCompatActivity {
         loginRequestQueue.add(postRequest);
     }
 
-    private String makeLoginJSONString(String name, String encryptedPass, String key) {
-        String res = "{\"username\":\"" + name + "\",\"password\":\"" + encryptedPass
-                + "\",\"key\":\"" + key + "\"}";
+    private String makeLoginJSONString(String name, String pass) {
+        String res = "{\"username\":\"" + name + "\",\"password\":\"" + pass + "\"}";
         return res;
     }
 
@@ -163,13 +189,15 @@ public class LoginActivity extends AppCompatActivity {
 
     private class LoginCrypt {
         private SecretKeySpec keySpec;
+        private IvParameterSpec ivSpec;
         private Cipher cipher;
 
-        public LoginCrypt(String key) {
+        public LoginCrypt(String key, String iv) {
             keySpec = new SecretKeySpec(key.getBytes(), "AES");
+            ivSpec = new IvParameterSpec(iv.getBytes());
 
             try {
-                cipher = Cipher.getInstance("AES/GCM/NoPadding");
+                cipher = Cipher.getInstance("AES");
             } catch (NoSuchAlgorithmException exception) {
                 Log.e("Algorithm not found", "No such algorithm could be found");
             } catch (NoSuchPaddingException exception) {
@@ -184,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
             byte[] res = null;
 
             try {
-                cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+                cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
                 res = cipher.doFinal(string.getBytes());
             } catch (Exception exception) {
                 Log.e("Encryption error", "Something went wrong with the encryption");
@@ -200,7 +228,7 @@ public class LoginActivity extends AppCompatActivity {
             byte[] res = null;
 
             try {
-                cipher.init(Cipher.DECRYPT_MODE, keySpec);
+                cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
 
                 res = cipher.doFinal(string.getBytes());
             } catch (Exception exception) {

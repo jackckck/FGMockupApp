@@ -38,12 +38,24 @@ public class ServerListAdapter extends ArrayAdapter<ServerObject> {
         serverIP = (TextView) resView.findViewById(R.id.serverIP);
         gameIdentifier = (TextView) resView.findViewById(R.id.gameIdentifier);
 
-        serverName.setText(serverList.get(position).getServerName());
+        String name = limitString(serverList.get(position).getServerName(), 18);
+        serverName.setText(name);
+
         playerCount.setText(serverList.get(position).getPlayerCount());
         serverIP.setText(serverList.get(position).getIp());
-        gameIdentifier.setText(serverList.get(position).getGame());
+
+        String game = limitString(serverList.get(position).getGame(), 16);
+        gameIdentifier.setText(game);
 
         return resView;
     }
 
+    private String limitString(String string, int limit) {
+        String res = string;
+        if (res.length() > limit) {
+            res = res.substring(0, limit + 1) + "...";
+        }
+
+        return res;
+    }
 }

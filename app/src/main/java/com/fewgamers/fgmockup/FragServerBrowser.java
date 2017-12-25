@@ -48,7 +48,7 @@ import java.util.Map;
  */
 
 // hier komt de server browser. momenteel maakt hij al contact met onze server, maar hij levert nog niets zinnigs op
-public class FragServerBrowser extends ListFragment {
+public class FragServerBrowser extends ListFragBase {
     ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
 
     ServerListAdapter serverAdapter;
@@ -58,6 +58,10 @@ public class FragServerBrowser extends ListFragment {
 
     Boolean sortingDirectionIsDown = true;
     Boolean isSortedAlphabetically = true;
+
+    Map<String, ArrayList<ServerObject>> serverListMap;
+
+    String serverListString;
 
     @Nullable
     @Override
@@ -71,18 +75,9 @@ public class FragServerBrowser extends ListFragment {
         // requestview opgehaald.
         final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
-        //makeStringRequest(requestQueue, "http://www.fewgamers.com/api.php");
+        makeStringRequest(requestQueue, "http://www.fewgamers.com/api/server/");
 
         String jsonString = "[{\"game\":\"CoD 2\",\"serverName\":\"Server One\",\"playercount\":\"8/10\",\"ip\":\"192.168.62.3\",\"creator\":\"jack\"},{\"game\":\"DoD\", \"serverName\":\"Server Two\",\"playercount\":\"9/22\",\"ip\":\"192.168.2.1\",\"creator\":\"luuk\"},{\"game\":\"SC:BW\", \"serverName\":\"Server Three\",\"playercount\":\"2/4\",\"ip\":\"190.68.1.0\",\"creator\":\"jack\"}]";
-
-        Map<String, ArrayList<ServerObject>> m = makeServerList(jsonString);
-
-        serverListAlphabetical = m.get("Alphabetical");
-        serverListByPlayers = m.get("Numerical");
-        serverList = new ArrayList<ServerObject>(m.get("Alphabetical"));
-
-        serverAdapter = new ServerListAdapter(getActivity(), serverList);
-        setListAdapter(serverAdapter);
 
         searchBar = (EditText) getActivity().findViewById(R.id.serverSearchBar);
         searchButton = (ImageButton) getActivity().findViewById(R.id.serverSearchButton);
@@ -200,14 +195,20 @@ public class FragServerBrowser extends ListFragment {
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                TextView tV = (TextView) getActivity().findViewById(R.id.serverBrowserTextView);
-                tV.setText("Response is: " + response);
+                serverListString = formatStringToJSONArray(response);
+                serverListMap = makeServerList(serverListString);
+
+                serverListAlphabetical = serverListMap.get("Alphabetical");
+                serverListByPlayers = serverListMap.get("Numerical");
+                serverList = new ArrayList<ServerObject>(serverListMap.get("Alphabetical"));
+
+                serverAdapter = new ServerListAdapter(getActivity(), serverList);
+                setListAdapter(serverAdapter);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                TextView tV = (TextView) getActivity().findViewById(R.id.serverBrowserTextView);
-                tV.setText("There was an error.");
+                Log.e("Server error", error.toString());
             }
         });
 
@@ -234,7 +235,7 @@ public class FragServerBrowser extends ListFragment {
 
                 Integer j = successCounter - 1;
 
-                while (j > - 1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
+                while (j > -1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
                     j--;
                 }
                 resAlphabetical.add(j + 1, serverObject);

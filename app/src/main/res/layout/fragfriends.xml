@@ -10,12 +10,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Friends"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <ListView
-        android:layout_below="@id/textViewFriends"
         android:id="@android:id/list"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></ListView>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewFriends"></ListView>
 
 </RelativeLayout>

@@ -2,11 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/background"
     android:paddingBottom="@dimen/fivedp"
     android:paddingEnd="@dimen/fivedp"
     android:paddingStart="@dimen/fivedp"
-    android:paddingTop="@dimen/fivedp"
-    android:background="@color/background">
+    android:paddingTop="@dimen/fivedp">
 
     <ImageView
         android:id="@+id/serverIcon"
@@ -52,8 +52,8 @@
         android:layout_alignBottom="@id/serverIcon"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="@dimen/fivedp"
-        android:text="CoD 2"
         android:layout_marginRight="@dimen/fivedp"
-        android:textSize="@dimen/server_font_size"/>
+        android:text="CoD 2"
+        android:textSize="@dimen/server_font_size" />
 
 </RelativeLayout>
