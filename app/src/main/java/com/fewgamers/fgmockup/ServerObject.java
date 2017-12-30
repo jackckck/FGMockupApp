@@ -18,17 +18,15 @@ public class ServerObject {
             this.game = jsonObject.getString("game");
             this.serverName = jsonObject.getString("name");
             //this.playerCount = jsonObject.getString("playercount");
-            this.playerCount = "-";
+            this.playerCount = "0/0";
             this.ip = jsonObject.getString("ip");
             this.userCreator = jsonObject.getString("creator");
         } catch (JSONException j) {
             Log.e("Corrupt server", "Server data incomplete");
         }
-        //String[] playerCountStrings = playerCount.split("/");
-        //livePlayer = Integer.parseInt(playerCountStrings[0]);
-        //maxPlayer = Integer.parseInt(playerCountStrings[1]);
-        livePlayer = 0;
-        maxPlayer = 0;
+        String[] playerCountStrings = playerCount.split("/");
+        livePlayer = Integer.parseInt(playerCountStrings[0]);
+        maxPlayer = Integer.parseInt(playerCountStrings[1]);
     }
 
     public String getGame() {

@@ -1,5 +1,6 @@
 package com.fewgamers.fgmockup;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -51,10 +52,12 @@ import java.util.Map;
 public class FragServerBrowser extends ListFragBase {
     ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
 
+    MainActivity mainActivity;
+
     ServerListAdapter serverAdapter;
 
     EditText searchBar;
-    ImageButton searchButton, sortingButton;
+    ImageButton sortingButton, filterButton;
 
     Boolean sortingDirectionIsDown = true;
     Boolean isSortedAlphabetically = true;
@@ -75,12 +78,20 @@ public class FragServerBrowser extends ListFragBase {
         // requestview opgehaald.
         final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
-        makeStringRequest(requestQueue, "http://www.fewgamers.com/api/server/");
+        mainActivity = (MainActivity) getActivity();
 
-        String jsonString = "[{\"game\":\"CoD 2\",\"serverName\":\"Server One\",\"playercount\":\"8/10\",\"ip\":\"192.168.62.3\",\"creator\":\"jack\"},{\"game\":\"DoD\", \"serverName\":\"Server Two\",\"playercount\":\"9/22\",\"ip\":\"192.168.2.1\",\"creator\":\"luuk\"},{\"game\":\"SC:BW\", \"serverName\":\"Server Three\",\"playercount\":\"2/4\",\"ip\":\"190.68.1.0\",\"creator\":\"jack\"}]";
+        //checkt of er al een serverlist gedownload is.
+        if (mainActivity.hasListStored) {
+            extractServerListFromJSONString(mainActivity.completeServerListString);
+        } else {
+            makeStringRequest(requestQueue, "http://www.fewgamers.com/api/server/");
+        }
 
+        // alles hieronder is voor buttons en edittexts
         searchBar = (EditText) getActivity().findViewById(R.id.serverSearchBar);
-        searchButton = (ImageButton) getActivity().findViewById(R.id.serverSearchButton);
+        filterButton = (ImageButton) getActivity().findViewById(R.id.serverFilterButton);
+
+        searchBar.setText(mainActivity.serverSearchFilter);
 
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -96,6 +107,7 @@ public class FragServerBrowser extends ListFragBase {
             @Override
             public void afterTextChanged(Editable s) {
                 searchFilter(s.toString().toLowerCase());
+                serverAdapter.notifyDataSetChanged();
             }
         });
 
@@ -122,6 +134,19 @@ public class FragServerBrowser extends ListFragBase {
                 pickSortingMethod();
 
                 return true;
+            }
+        });
+
+        filterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragServerBrowserFilter fragment = new FragServerBrowserFilter();
+
+                if (fragment != null) {
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.replace(R.id.MyFrameLayout, fragment);
+                    ft.commit();
+                }
             }
         });
 
@@ -157,7 +182,32 @@ public class FragServerBrowser extends ListFragBase {
                 serverList.add(so);
             }
         }
-        serverAdapter.notifyDataSetChanged();
+
+        mainActivity.serverSearchFilter = search;
+    }
+
+    private void playerCountFilter() {
+        Integer[] playerLimit = mainActivity.playerCountLimit;
+        Integer playerMin, playerMax, maxPlayerMin, maxPlayerMax, livePlayer, maxPlayer;
+        playerMin = playerLimit[0];
+        playerMax = playerLimit[1];
+        maxPlayerMin = playerLimit[2];
+        maxPlayerMax = playerLimit[3];
+
+        for (int i = 0; i < serverListAlphabetical.size(); i++) {
+            ServerObject so = serverListAlphabetical.get(i);
+            livePlayer = so.getLivePlayer();
+            if ((playerMin != null && livePlayer < playerMin) || (playerMax != null && playerMax < livePlayer)) {
+                serverListAlphabetical.remove(i);
+                serverListByPlayers.remove(so);
+                break;
+            }
+            maxPlayer = so.getMaxPlayer();
+            if ((maxPlayerMin != null && maxPlayer < maxPlayerMin) || (maxPlayerMax != null && maxPlayerMax < maxPlayer)) {
+                serverListAlphabetical.remove(i);
+                serverListByPlayers.remove(so);
+            }
+        }
     }
 
     private void pickSortingMethod() {
@@ -191,19 +241,15 @@ public class FragServerBrowser extends ListFragBase {
     }
 
     private void makeStringRequest(RequestQueue queue, String url) {
-
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 serverListString = formatStringToJSONArray(response);
-                serverListMap = makeServerList(serverListString);
 
-                serverListAlphabetical = serverListMap.get("Alphabetical");
-                serverListByPlayers = serverListMap.get("Numerical");
-                serverList = new ArrayList<ServerObject>(serverListMap.get("Alphabetical"));
+                mainActivity.completeServerListString = serverListString;
+                mainActivity.hasListStored = true;
 
-                serverAdapter = new ServerListAdapter(getActivity(), serverList);
-                setListAdapter(serverAdapter);
+                extractServerListFromJSONString(serverListString);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -215,12 +261,30 @@ public class FragServerBrowser extends ListFragBase {
         queue.add(stringRequest);
     }
 
+    private void extractServerListFromJSONString(String jsonString) {
+        serverListMap = makeServerList(jsonString);
+
+        serverListAlphabetical = serverListMap.get("Alphabetical");
+        serverListByPlayers = serverListMap.get("Numerical");
+        serverList = new ArrayList<ServerObject>(serverListMap.get("Alphabetical"));
+
+        String search = mainActivity.serverSearchFilter;
+        if (search != null) {
+            searchFilter(search);
+        }
+
+        serverAdapter = new ServerListAdapter(getActivity(), serverList);
+        setListAdapter(serverAdapter);
+    }
+
     private Map<String, ArrayList<ServerObject>> makeServerList(String jsonString) {
         JSONArray jsonArray = null;
         try {
             jsonArray = new JSONArray(jsonString);
         } catch (JSONException exception) {
             Log.e("Server list not found", "Something went wrong when loading server data");
+        } catch (NullPointerException exception) {
+            Log.d("dit hadden we wel:", jsonString);
         }
 
         ArrayList<ServerObject> resAlphabetical = new ArrayList<>();
@@ -229,10 +293,20 @@ public class FragServerBrowser extends ListFragBase {
         Integer successCounter = 0;
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            try {
-                ServerObject serverObject = new ServerObject();
-                serverObject.defineServer(jsonArray.getJSONObject(i));
+            ServerObject serverObject = new ServerObject();
 
+            try {
+                serverObject.defineServer(jsonArray.getJSONObject(i));
+            } catch (JSONException exception) {
+                Log.e("Server data missing", "Some property of the server object could not be found inside the JSON string.");
+            }
+
+            Integer livePlayer, maxPlayer;
+            livePlayer = serverObject.getLivePlayer();
+            maxPlayer = serverObject.getMaxPlayer();
+            Integer[] playerCountLimit = mainActivity.playerCountLimit;
+
+            if (playerCountLimit[0] <= livePlayer && livePlayer < playerCountLimit[1] && playerCountLimit[2] <= maxPlayer && maxPlayer < playerCountLimit[3]) {
                 Integer j = successCounter - 1;
 
                 while (j > -1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
@@ -248,8 +322,6 @@ public class FragServerBrowser extends ListFragBase {
                 resNumerical.add(j + 1, serverObject);
 
                 successCounter++;
-            } catch (JSONException exception) {
-                Log.e("Server object missing", "Server object data incomplete");
             }
         }
 

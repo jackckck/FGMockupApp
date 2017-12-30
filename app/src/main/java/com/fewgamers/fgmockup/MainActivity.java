@@ -21,13 +21,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
+import com.android.volley.RequestQueue;
+
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public String completeServerListString;
+    public String completeFriendListString;
+    public String serverSearchFilter;
+    public boolean hasListStored;
+
+    public Integer[] playerCountLimit = new Integer[4];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        playerCountLimit[0] = 0;
+        playerCountLimit[1] = 999;
+        playerCountLimit[2] = 0;
+        playerCountLimit[3] = 999;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -66,8 +82,7 @@ public class MainActivity extends AppCompatActivity
         if (f instanceof FragServerInfo) {
             Fragment fragment = new FragServerBrowser();
             executeFragmentTransaction(fragment);
-        }
-        else if (f instanceof FragFriendsInfo) {
+        } else if (f instanceof FragFriendsInfo) {
             Fragment fragment = new FragFriends();
             executeFragmentTransaction(fragment);
         }
@@ -144,29 +159,29 @@ public class MainActivity extends AppCompatActivity
             logOut();
         }
 
-            executeFragmentTransaction(fragment);
+        executeFragmentTransaction(fragment);
 
-            return super.onOptionsItemSelected(item);
-        }
-
-        // kijkt welke frienditem is aangeklikt. in DisplayFragment wordt het meeste werk gedaan.
-        @SuppressWarnings("StatementWithEmptyBody")
-        @Override
-        public boolean onNavigationItemSelected (MenuItem item){
-
-            DisplayFragment(item.getItemId());
-            return true;
-        }
-
-        private void logOut() {
-            SharedPreferences loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
-            SharedPreferences.Editor loginEditor = loginSharedPreferences.edit();
-
-            loginEditor.putBoolean("stayLogged", false);
-            loginEditor.commit();
-
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
+        return super.onOptionsItemSelected(item);
     }
+
+    // kijkt welke frienditem is aangeklikt. in DisplayFragment wordt het meeste werk gedaan.
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+
+        DisplayFragment(item.getItemId());
+        return true;
+    }
+
+    private void logOut() {
+        SharedPreferences loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+        SharedPreferences.Editor loginEditor = loginSharedPreferences.edit();
+
+        loginEditor.putBoolean("stayLogged", false);
+        loginEditor.commit();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+}

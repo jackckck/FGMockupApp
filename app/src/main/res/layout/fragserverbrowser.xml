@@ -19,7 +19,7 @@
     <EditText
         android:id="@+id/serverSearchBar"
         android:layout_width="match_parent"
-        android:layout_alignBottom="@id/serverSearchButton"
+        android:layout_alignBottom="@id/serverFilterButton"
         android:layout_height="match_parent"
         android:layout_marginStart="@dimen/fivedp"
         android:layout_alignEnd="@id/sortingButton"
@@ -30,12 +30,12 @@
         android:id="@+id/sortingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/serverSearchButton"
-        android:layout_alignTop="@id/serverSearchButton"
+        android:layout_toLeftOf="@id/serverFilterButton"
+        android:layout_alignTop="@id/serverFilterButton"
         android:src="@drawable/ic_arrow_downward_black_24dp"/>
 
     <ImageButton
-        android:id="@+id/serverSearchButton"
+        android:id="@+id/serverFilterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"

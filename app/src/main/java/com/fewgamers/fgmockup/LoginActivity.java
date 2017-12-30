@@ -3,37 +3,38 @@ package com.fewgamers.fgmockup;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.InputType;
+import android.support.v7.app.AppCompatActivity;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
-import org.w3c.dom.Text;
-
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -141,39 +142,43 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        sendLoginRequest(encryptedLoginJSONString);
+        Log.d("encrypto", encryptedLoginJSONString);
+        new LoginAsyncTask().execute("http://fewgamers.com/api/login/", encryptedLoginJSONString);
     }
 
-    private void sendLoginRequest(final String string) {
-        StringRequest postRequest = new StringRequest(Request.Method.POST, " http://www.fewgamers.com/api/login/",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // response
-                        Log.d("Response", response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        if (error.getMessage() != null) {
-                            Log.d("Error.Response", error.getMessage());
-                        } else {
-                            Log.d("Error.Response", "Indefinite error");
-                        }
-                    }
-                }
-        ) {
+    private void makeLoginRequest(final String string) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://www.fewgamers.com/api/login/", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("Response", response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("login error", error.toString());
+            }
+        }) {
             @Override
             protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<String, String>();
+                Map<String, String> params = new HashMap<>();
                 params.put("User data", string);
 
                 return params;
             }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                return headers;
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
         };
-        loginRequestQueue.add(postRequest);
+        loginRequestQueue.add(stringRequest);
     }
 
     private String makeLoginJSONString(String name, String pass) {
@@ -239,7 +244,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         public String byteArrayToHexString(byte[] array) {
-            StringBuffer hexString = new StringBuffer();
+            StringBuilder hexString = new StringBuilder();
             for (byte b : array) {
                 int intVal = b & 0xff;
                 if (intVal < 0x10)
