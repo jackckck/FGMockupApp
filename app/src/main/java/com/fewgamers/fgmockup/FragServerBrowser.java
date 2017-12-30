@@ -266,7 +266,7 @@ public class FragServerBrowser extends ListFragBase {
 
         serverListAlphabetical = serverListMap.get("Alphabetical");
         serverListByPlayers = serverListMap.get("Numerical");
-        serverList = new ArrayList<ServerObject>(serverListMap.get("Alphabetical"));
+        serverList = new ArrayList<>(serverListMap.get("Alphabetical"));
 
         String search = mainActivity.serverSearchFilter;
         if (search != null) {

@@ -18,4 +18,5 @@
     <dimen name="server_font_size">15sp</dimen>
     <dimen name="friend_font_size">20sp</dimen>
     <dimen name="chat_font_size">18sp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
 </resources>

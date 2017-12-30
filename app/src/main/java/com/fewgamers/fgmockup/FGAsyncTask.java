@@ -15,7 +15,9 @@ import java.net.URL;
  * Created by Administrator on 12/28/2017.
  */
 
-public class LoginAsyncTask extends AsyncTask<String, Void, String> {
+public class FGAsyncTask extends AsyncTask<String, Void, String> {
+    String response = "";
+
     @Override
     protected String doInBackground(String... strings) {
         try {
@@ -43,18 +45,14 @@ public class LoginAsyncTask extends AsyncTask<String, Void, String> {
                 responseOutput.append(line);
             }
 
-            Log.d("Response Output", responseOutput.toString());
+            response = responseOutput.toString();
+            Log.d("Response Output", response);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
-    }
-
-    @Override
-    protected void onPostExecute(String response) {
-
+        return response;
     }
 }
