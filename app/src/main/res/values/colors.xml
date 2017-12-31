@@ -4,14 +4,10 @@
     <color name="colorPrimaryDark">#481d70</color>
     <color name="colorAccent">#532199</color>
 
-    <color name="nightColorPrimary">#484848</color>
-    <color name="nightColorPrimaryDark">#333333</color>
-
     <color name="background">#f4f4f4</color>
     <color name="nightBackground">#808080</color>
 
-    <color name="fontColor">#898989</color>
-    <color name="nightFontColor">#ffffff</color>
-
     <color name="errorColor">#ff2d2d</color>
+
+    <color name="sendButtonColor">#48c494</color>
 </resources>

@@ -51,9 +51,10 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
     SharedPreferences loginSharedPreferences;
     SharedPreferences.Editor loginEditor;
 
-    LoginActivity.LoginCrypt loginCrypt;
+    LoginCrypt loginCrypt;
 
     RequestQueue loginRequestQueue;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -64,11 +65,11 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        userName = (EditText) findViewById(R.id.userName);
-        password = (EditText) findViewById(R.id.password);
-        login = (Button) findViewById(R.id.loginButton);
-        visibility = (ImageButton) findViewById(R.id.passwordVisibilityButton);
-        check = (CheckBox) findViewById(R.id.loginCheck);
+        userName = (EditText) getActivity().findViewById(R.id.userName);
+        password = (EditText) getActivity().findViewById(R.id.password);
+        login = (Button) getActivity().findViewById(R.id.loginButton);
+        visibility = (ImageButton) getActivity().findViewById(R.id.passwordVisibilityButton);
+        check = (CheckBox) getActivity().findViewById(R.id.loginCheck);
         userName.setText("");
         password.setText("");
 
@@ -78,12 +79,12 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
         generalKey = "Fewg am er s1234";
         iv = "";
 
-        loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+        loginSharedPreferences = getActivity().getSharedPreferences("LoginData", Context.MODE_PRIVATE);
         loginEditor = loginSharedPreferences.edit();
 
-        loginCrypt = new LoginActivity.LoginCrypt(generalKey, iv);
+        loginCrypt = new LoginCrypt(generalKey, iv);
 
-        loginRequestQueue = RequestSingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+        loginRequestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
         if (loginSharedPreferences.getBoolean("stayLogged", false)) {
             allowAccess();
@@ -120,6 +121,7 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
             }
         });
     }
+
     private void checkLogin() {
         name = userName.getText().toString();
         pass = password.getText().toString();
@@ -146,7 +148,7 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
         }
 
         Log.d("encrypto", encryptedLoginJSONString);
-        new LoginActivity.LoginAsyncTask().execute("http://fewgamers.com/api/login/", "{\"logindata\":\"mKa8++Zb/CC9AHh/PBFMS2y6FHx9YqZVwJ1Sb3x52pC6fJQVKpO3q+W3oUk/jQZw\"}");
+        new LoginAsyncTask().execute("http://fewgamers.com/api/login/", "{\"logindata\":\"mKa8++Zb/CC9AHh/PBFMS2y6FHx9YqZVwJ1Sb3x52pC6fJQVKpO3q+W3oUk/jQZw\"}");
     }
 
     private String makeLoginJSONString(String name, String pass) {
@@ -155,9 +157,9 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
     }
 
     private void allowAccess() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
-        finish();
+        getActivity().finish();
     }
 
     private class LoginCrypt {
@@ -231,6 +233,9 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
 
                 userKey = jsonObject.getString("key");
                 activationCode = jsonObject.getString("activationcode");
+
+                loginEditor.putString("userKey", userKey);
+                loginEditor.putString("activationCode", activationCode);
 
                 Log.d("key", userKey);
                 Log.d("activationCode", activationCode);

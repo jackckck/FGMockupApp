@@ -9,23 +9,40 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></ListView>
+        android:layout_height="wrap_content"
+        android:divider="@android:color/transparent"></ListView>
 
     <EditText
         android:id="@+id/messageEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/sendFloatingActionButton"
-        android:hint="Your message here ..." />
+        android:layout_above="@id/chatBottomDummy"
+        android:layout_marginEnd="@dimen/fivedp"
+        android:layout_marginStart="@dimen/fivedp"
+        android:layout_toStartOf="@id/sendFloatingActionButton"
+        android:background="@drawable/chat_rounded_edittext"
+        android:hint="Your message here ..."
+        android:paddingBottom="@dimen/twelvedp"
+        android:paddingEnd="@dimen/fifteendp"
+        android:paddingStart="@dimen/fifteendp"
+        android:paddingTop="@dimen/twelvedp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/sendFloatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/chat_send_button_dimensions"
+        android:layout_height="@dimen/chat_send_button_dimensions"
+        android:layout_above="@id/chatBottomDummy"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/fivedp"
         android:clickable="true"
-        android:src="@drawable/ic_menu_send" />
+        android:src="@drawable/ic_menu_send"
+        android:backgroundTint="@color/sendButtonColor"
+        app:borderWidth="0dp" />
+
+    <View
+        android:id="@+id/chatBottomDummy"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fivedp"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

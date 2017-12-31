@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity
     public String serverSearchFilter;
     public boolean hasListStored;
 
+    public String userKey, activactionCode;
+
     public Integer[] playerCountLimit = new Integer[4];
 
     @Override
@@ -44,6 +46,10 @@ public class MainActivity extends AppCompatActivity
         playerCountLimit[1] = 999;
         playerCountLimit[2] = 0;
         playerCountLimit[3] = 999;
+
+        SharedPreferences mainSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+        userKey = mainSharedPreferences.getString("key", null);
+        activactionCode = mainSharedPreferences.getString("key", null);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -180,7 +186,7 @@ public class MainActivity extends AppCompatActivity
         loginEditor.putBoolean("stayLogged", false);
         loginEditor.commit();
 
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
         finish();
     }

@@ -8,15 +8,29 @@
 
     <dimen name="settings_vertical_margin">50dp</dimen>
     <dimen name="settings_horizontal_margin">50dp</dimen>
-    <dimen name="settings_vertical_spacing">50dp</dimen>
-    <dimen name="settings_horizontal_spacing">100dp</dimen>
 
+    <dimen name="fourdp">4dp</dimen>
     <dimen name="fivedp">5dp</dimen>
+    <dimen name="tendp">10dp</dimen>
+    <dimen name="twelvedp">12dp</dimen>
     <dimen name="fifteendp">15dp</dimen>
+    <dimen name="eightdp">8dp</dimen>
+
+    <dimen name="register_vertical_spacing">12dp</dimen>
 
     <dimen name="settings_font_size">20sp</dimen>
     <dimen name="server_font_size">15sp</dimen>
     <dimen name="friend_font_size">20sp</dimen>
     <dimen name="chat_font_size">18sp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="register_font_size">14dp</dimen>
+    <dimen name="chat_time_stamp_size">10sp</dimen>
+
+    <dimen name="chat_vertical_spacing">8dp</dimen>
+
+    <dimen name="chat_message_horizontal_padding">15dp</dimen>
+    <dimen name="chat_message_vertical_padding">10dp</dimen>
+    <dimen name="chat_bubble_padding">10dp</dimen>
+
+    <dimen name="chat_send_button_dimensions">49dp</dimen>
 </resources>

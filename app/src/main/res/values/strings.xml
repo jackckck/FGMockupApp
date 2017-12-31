@@ -8,5 +8,4 @@
     <string name="title_activity_auth">AuthActivity</string>
     <string name="tab_text_1">Login</string>
     <string name="tab_text_2">Register</string>
-    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

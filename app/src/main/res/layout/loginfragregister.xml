@@ -9,9 +9,9 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/registerPasswordEdit"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/fifteendp"
+        android:layout_marginTop="60dp"
         android:text="First name"
-        android:textSize="@dimen/chat_font_size" />
+        android:textSize="@dimen/register_font_size" />
 
     <EditText
         android:id="@+id/registerFirstNameEdit"
@@ -29,8 +29,9 @@
         android:layout_alignStart="@id/registerPasswordEdit"
         android:layout_below="@id/registerFirstNameEdit"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/register_vertical_spacing"
         android:text="Last name"
-        android:textSize="@dimen/chat_font_size" />
+        android:textSize="@dimen/register_font_size" />
 
     <EditText
         android:id="@+id/registerLastNameEdit"
@@ -47,8 +48,9 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/registerPasswordEdit"
         android:layout_below="@id/registerLastNameEdit"
+        android:layout_marginTop="@dimen/register_vertical_spacing"
         android:text="Email address*"
-        android:textSize="@dimen/chat_font_size" />
+        android:textSize="@dimen/register_font_size" />
 
     <EditText
         android:id="@+id/registerEmailEdit"
@@ -65,8 +67,9 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/registerPasswordEdit"
         android:layout_below="@id/registerEmailEdit"
+        android:layout_marginTop="@dimen/register_vertical_spacing"
         android:text="Username*"
-        android:textSize="@dimen/chat_font_size" />
+        android:textSize="@dimen/register_font_size" />
 
     <EditText
         android:id="@+id/registerUsernameEdit"
@@ -83,8 +86,9 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/registerPasswordEdit"
         android:layout_below="@id/registerUsernameEdit"
+        android:layout_marginTop="@dimen/register_vertical_spacing"
         android:text="Password*"
-        android:textSize="@dimen/chat_font_size" />
+        android:textSize="@dimen/register_font_size" />
 
 
     <EditText
@@ -101,7 +105,15 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/registerPasswordEdit"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/fifteendp"
+        android:layout_marginTop="@dimen/fivedp"
         android:text="Register" />
+
+    <TextView
+        android:id="@+id/registerFailText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/registerButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/fifteendp" />
 
 </RelativeLayout>
