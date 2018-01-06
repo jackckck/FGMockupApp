@@ -7,10 +7,8 @@
         android:id="@+id/applyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="@dimen/fifteendp"
-        android:layout_marginEnd="@dimen/fifteendp"
+        android:layout_below="@id/maxPlayerCountMinimum"
+        android:layout_marginStart="@dimen/tendp"
         android:text="Apply" />
 
     <TextView

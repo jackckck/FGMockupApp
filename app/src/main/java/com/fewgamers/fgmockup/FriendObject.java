@@ -12,6 +12,7 @@ import org.json.JSONObject;
 public class FriendObject {
     private String friendName, friendEMail, firstName, lastName, friendStatus;
     private Boolean isFriend = false;
+    private Integer unreadCount;
 
     public FriendObject() {
         friendName = "";
@@ -68,6 +69,10 @@ public class FriendObject {
         return isFriend;
     }
 
+    public Integer getUnreadCount() {
+        return unreadCount;
+    }
+
     public void setFriendName(String friendName) {
         this.friendName = friendName;
     }
@@ -80,4 +85,7 @@ public class FriendObject {
         this.friendStatus = friendStatus;
     }
 
+    public void addToUnread(Integer count) {
+        unreadCount += count;
+    }
 }

@@ -41,6 +41,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/fourdp"
+        android:layout_marginTop="@dimen/fourdp"
         android:text="Offline" />
+
+    <TextView
+        android:id="@+id/friendUnreadCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/friendEMail"
+        android:layout_marginEnd="@dimen/fourdp"
+        android:layout_marginTop="@dimen/fourdp"
+        android:text="6"
+        android:textSize="18sp" />
 
 </RelativeLayout>

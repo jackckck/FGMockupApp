@@ -81,10 +81,10 @@ public class FragServerBrowser extends ListFragBase {
         mainActivity = (MainActivity) getActivity();
 
         //checkt of er al een serverlist gedownload is.
-        if (mainActivity.hasListStored) {
+        if (mainActivity.hasServerListStored) {
             extractServerListFromJSONString(mainActivity.completeServerListString);
         } else {
-            makeStringRequest(requestQueue, "http://www.fewgamers.com/api/server/");
+            makeStringRequest(requestQueue, "https://www.fewgamers.com/api/server/");
         }
 
         // alles hieronder is voor buttons en edittexts
@@ -247,7 +247,7 @@ public class FragServerBrowser extends ListFragBase {
                 serverListString = formatStringToJSONArray(response);
 
                 mainActivity.completeServerListString = serverListString;
-                mainActivity.hasListStored = true;
+                mainActivity.hasServerListStored = true;
 
                 extractServerListFromJSONString(serverListString);
             }

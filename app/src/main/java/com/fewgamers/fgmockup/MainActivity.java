@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,27 +30,31 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public String completeServerListString;
-    public String completeFriendListString;
+    public String completeContactsListString;
     public String serverSearchFilter;
-    public boolean hasListStored;
+    public boolean hasServerListStored, hasFriendListStored;
 
     public String userKey, activactionCode;
 
     public Integer[] playerCountLimit = new Integer[4];
+
+    public SharedPreferences mainSharedPreferences;
+
+    public TabLayout friendsTabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        friendsTabs = findViewById(R.id.friendsTabs);
+
         playerCountLimit[0] = 0;
         playerCountLimit[1] = 999;
         playerCountLimit[2] = 0;
         playerCountLimit[3] = 999;
 
-        SharedPreferences mainSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
-        userKey = mainSharedPreferences.getString("key", null);
-        activactionCode = mainSharedPreferences.getString("key", null);
+        mainSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -105,6 +110,8 @@ public class MainActivity extends AppCompatActivity
     private void DisplayFragment(int id) {
         Fragment fragment = null;
 
+        friendsTabs.setVisibility(View.GONE);
+
         switch (id) {
             case R.id.nav_blocked:
                 fragment = new FragBlocked();
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_friends:
                 fragment = new FragFriends();
+                friendsTabs.setVisibility(View.VISIBLE);
                 break;
             case R.id.nav_home:
                 fragment = new FragHome();

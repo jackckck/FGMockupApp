@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,7 @@ public class ChatAdapter extends ArrayAdapter<ChatObject> {
 
         if (thisChatobject.isADateNotifier()) {
             chatDateNotifier = (TextView) resView.findViewById(R.id.chatDateNotifier);
-            chatDateNotifier.setText(thisChatobject.getDate());
+            chatDateNotifier.setText(getDateNotifierString(thisChatobject.getDate()));
             chatDateNotifier.setBackground(context.getResources().getDrawable(R.drawable.chat_date_rounded_textview));
             return resView;
         }
@@ -60,5 +61,60 @@ public class ChatAdapter extends ArrayAdapter<ChatObject> {
         timeOfDay.setText(thisChatobject.getTimeOfDay());
 
         return resView;
+    }
+
+    private String getDateNotifierString(String dateString) {
+        String month, day, year;
+        switch (dateString.substring(0, 2)) {
+            case "01":
+                month = "January";
+                break;
+            case "02":
+                month = "February";
+                break;
+            case "03":
+                month = "March";
+                break;
+            case "04":
+                month = "April";
+                break;
+            case "05":
+                month = "May";
+                break;
+            case "06":
+                month = "June";
+                break;
+            case "07":
+                month = "July";
+                break;
+            case "08":
+                month = "August";
+                break;
+            case "09":
+                month = "September";
+                break;
+            case "10":
+                month = "Oktober";
+                break;
+            case "11":
+                month = "November";
+                break;
+            case "12":
+                month = "December";
+                break;
+            default:
+                month = null;
+        }
+        day = dateString.substring(3, 5);
+        if (Integer.parseInt(day) < 10) {
+            day = day.substring(1, 2);
+        }
+        year = dateString.substring(6, 10);
+        if (month != null) {
+            return month + " " + day + ", " + year;
+        }
+        else {
+            return "";
+        }
     }
 }

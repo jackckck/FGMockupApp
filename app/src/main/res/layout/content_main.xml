@@ -4,16 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.fewgamers.fgmockup.MainActivity"
-    tools:showIn="@layout/app_bar_main"
-
     android:background="@color/background"
-    >
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+
+    tools:context="com.fewgamers.fgmockup.MainActivity"
+
+    tools:showIn="@layout/app_bar_main">
 
     <FrameLayout
         android:id="@+id/MyFrameLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

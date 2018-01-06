@@ -27,7 +27,6 @@ public class ServerListAdapter extends ArrayAdapter<ServerObject> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View resView = inflater.inflate(R.layout.server_list_item, parent, false);

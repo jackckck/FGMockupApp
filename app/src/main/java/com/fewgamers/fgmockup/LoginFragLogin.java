@@ -126,16 +126,6 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
         name = userName.getText().toString();
         pass = password.getText().toString();
 
-        if ((name.equals("jack") || name.equals("luuk")) && pass.equals("FewGamers")) {
-            if (check.isChecked()) {
-                loginEditor.putBoolean("stayLogged", true);
-                loginEditor.commit();
-            }
-            allowAccess();
-        } else {
-            password.setBackgroundColor(getResources().getColor(R.color.errorColor));
-        }
-
         String loginJSONString, encryptedLoginJSONString;
 
         try {
@@ -148,7 +138,7 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
         }
 
         Log.d("encrypto", encryptedLoginJSONString);
-        new LoginAsyncTask().execute("http://fewgamers.com/api/login/", "{\"logindata\":\"mKa8++Zb/CC9AHh/PBFMS2y6FHx9YqZVwJ1Sb3x52pC6fJQVKpO3q+W3oUk/jQZw\"}");
+        new LoginAsyncTask().execute("https://fewgamers.com/api/login/", "{\"logindata\":\"mKa8++Zb/CC9AHh/PBFMS2y6FHx9YqZVwJ1Sb3x52pC6fJQVKpO3q+W3oUk/jQZw\"}");
     }
 
     private String makeLoginJSONString(String name, String pass) {
@@ -231,14 +221,21 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
             try {
                 JSONObject jsonObject = new JSONObject(response);
 
+
                 userKey = jsonObject.getString("key");
                 activationCode = jsonObject.getString("activationcode");
 
+                loginEditor.putString("email", jsonObject.getString("email"));
+                loginEditor.putString("nickname", jsonObject.getString("nickname"));
+                loginEditor.putString("firstName", jsonObject.getString("firstname"));
+                loginEditor.putString("lastName", jsonObject.getString("lastname"));
                 loginEditor.putString("userKey", userKey);
                 loginEditor.putString("activationCode", activationCode);
 
                 Log.d("key", userKey);
                 Log.d("activationCode", activationCode);
+
+                allowAccess();
 
             } catch (JSONException exception) {
                 Log.e("Incorrect user data", "Retrieved user login data was incomplete");

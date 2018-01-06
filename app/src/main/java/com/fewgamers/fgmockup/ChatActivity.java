@@ -1,6 +1,11 @@
 package com.fewgamers.fgmockup;
 
 import android.app.ListActivity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,11 +41,13 @@ public class ChatActivity extends ListActivity {
     Calendar chatCalendar;
     TimeZone chatTimeZone;
 
-    DateFormat chatTimeFormat, chatDateFormat, chatMonthFormat, chatDayFormat;
+    DateFormat chatTimeFormat, chatDateFormat;
 
     Date chatDate;
 
-    Integer previousMonth, previousDay;
+    Integer previousMonth, previousDay, previousYear;
+
+    FriendObject friend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +57,6 @@ public class ChatActivity extends ListActivity {
         chatTimeZone = TimeZone.getDefault();
         chatTimeFormat = new SimpleDateFormat("HH:mm");
         chatDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        chatMonthFormat = new SimpleDateFormat("MM");
-        chatDayFormat = new SimpleDateFormat("dd");
 
         String jsonString = "[{\"user\":\"me\",\"message\":\"hello_world\",\"fromMe\":\"false\",\"date\":\"01-01-1997\",\"time\":\"1:00\"},{\"user\":\"me\",\"message\":\"hello_world\",\"fromMe\":\"true\",\"date\":\"01-01-1997\",\"time\":\"1:00\"}]";
         chatList = makeChatList(jsonString);
@@ -63,6 +68,7 @@ public class ChatActivity extends ListActivity {
             String previousDateString = chatList.get(chatList.size() - 1).getDate();
             previousMonth = Integer.parseInt(previousDateString.substring(0, 2));
             previousDay = Integer.parseInt(previousDateString.substring(3, 5));
+            previousYear = Integer.parseInt(previousDateString.substring(6, 10));
         }
 
         sendButton = (FloatingActionButton) findViewById(R.id.sendFloatingActionButton);
@@ -72,6 +78,7 @@ public class ChatActivity extends ListActivity {
             @Override
             public void onClick(View v) {
                 sendMessage(messageText.getText().toString());
+                notifyOfMessage("sender", messageText.getText().toString());
             }
         });
     }
@@ -86,11 +93,13 @@ public class ChatActivity extends ListActivity {
         chatCalendar = Calendar.getInstance(chatTimeZone);
         chatDate = chatCalendar.getTime();
 
-        Integer currentMonth, currentDay;
-        currentMonth = Integer.parseInt(chatMonthFormat.format(chatDate));
-        currentDay = Integer.parseInt(chatDayFormat.format(chatDate));
+        Integer currentMonth, currentDay, currentYear;
+        String chatDateString = chatDateFormat.format(chatDate);
+        currentMonth = Integer.parseInt(chatDateString.substring(0, 2));
+        currentDay = Integer.parseInt(chatDateString.substring(3, 5));
+        currentYear = Integer.parseInt(chatDateString.substring(6, 10));
 
-        if (currentMonth >= previousMonth && currentDay > previousDay) {
+        if ((currentMonth >= previousMonth && currentDay > previousDay) || currentYear > previousYear) {
             ChatObject dateNotifier = new ChatObject();
             dateNotifier.setDate(chatDateFormat.format(chatDate));
             dateNotifier.setAsDateNotifer();
@@ -98,10 +107,11 @@ public class ChatActivity extends ListActivity {
 
             previousMonth = currentMonth;
             previousDay = currentDay;
+            previousYear = currentYear;
         }
 
         messageObject.defineChatObject("me", message, "true",
-                chatDateFormat.format(chatDate), chatTimeFormat.format(chatDate));
+                chatDateString, chatTimeFormat.format(chatDate));
 
         chatAdapter.add(messageObject);
 
@@ -132,5 +142,16 @@ public class ChatActivity extends ListActivity {
         }
 
         return res;
+    }
+
+    private void notifyOfMessage(String sender, String message) {
+        Notification.Builder builder = new Notification.Builder(getApplicationContext());
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.addAction(R.drawable.placeholder_notification_icon, "Test notification", pendingIntent);
+        builder.setSmallIcon(R.drawable.placeholder_notification_icon);
+        builder.setContentTitle("Test notification");
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(1, builder.build());
     }
 }
