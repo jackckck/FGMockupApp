@@ -58,6 +58,10 @@ public class FragContacts extends ListFragBase {
 
     Map<String, ArrayList<FriendObject>> contactsListMap;
 
+    TabLayout.OnTabSelectedListener conctactsTabsSelect;
+
+    private boolean notReady = true;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -102,9 +106,12 @@ public class FragContacts extends ListFragBase {
             }
         });
 
-        mainActivity.friendsTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        conctactsTabsSelect = new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                if (notReady) {
+                    return;
+                }
                 contactsList.clear();
                 switch (tab.getPosition()) {
                     case 0:
@@ -130,7 +137,8 @@ public class FragContacts extends ListFragBase {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
             }
-        });
+        };
+        mainActivity.friendsTabs.addOnTabSelectedListener(conctactsTabsSelect);
 
         super.onViewCreated(view, savedInstanceState);
     }
@@ -277,7 +285,13 @@ public class FragContacts extends ListFragBase {
         friendAdapter = new FriendListAdapter(getActivity(), contactsList);
         setListAdapter(friendAdapter);
 
+        notReady = false;
+
         mainActivity.completeContactsListString = contactsListString;
         mainActivity.hasFriendListStored = true;
+    }
+
+    public void removeTabsSelector() {
+        mainActivity.friendsTabs.removeOnTabSelectedListener(conctactsTabsSelect);
     }
 }

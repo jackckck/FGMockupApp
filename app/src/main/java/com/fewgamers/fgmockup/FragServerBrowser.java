@@ -84,8 +84,9 @@ public class FragServerBrowser extends ListFragBase {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // hier wordt een nieuwe requestview geïnstantieerd als die nog niet bestaat. als hij wel bestaat wordt de bestaande
         // requestview opgehaald.
-        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+        super.onViewCreated(view, savedInstanceState);
 
+        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
         mainActivity = (MainActivity) getActivity();
 
         getFilterPreferences();
@@ -159,8 +160,6 @@ public class FragServerBrowser extends ListFragBase {
                 }
             }
         });
-
-        super.onViewCreated(view, savedInstanceState);
     }
 
     @Override

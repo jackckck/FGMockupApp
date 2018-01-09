@@ -19,7 +19,7 @@ import java.net.URL;
  */
 
 public class FGAsyncTask extends AsyncTask<String, Void, String> {
-    String response = "";
+    private String response = "";
 
     @Override
     protected String doInBackground(String... strings) {

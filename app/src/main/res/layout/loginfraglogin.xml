@@ -25,20 +25,11 @@
         android:hint="Password"
         android:inputType="textPassword" />
 
-    <CheckBox
-        android:id="@+id/loginCheck"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/loginPass"
-        android:layout_below="@+id/loginPass"
-        android:layout_marginTop="12dp"
-        android:text="Stay logged in" />
-
     <Button
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/loginCheck"
+        android:layout_below="@+id/loginPass"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:text="Login" />

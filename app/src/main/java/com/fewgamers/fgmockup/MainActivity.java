@@ -19,6 +19,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity
     public String serverSearchFilter;
     public boolean hasServerListStored, hasFriendListStored;
 
-    public String userKey, activactionCode;
+    public String uuid, username, email, firstName, lastName, key, activactionCode;
 
     public Integer[] playerCountLimit = new Integer[4];
 
@@ -38,10 +40,14 @@ public class MainActivity extends AppCompatActivity
 
     public int friendsTabSelected, userTabSelected;
 
+    private ArrayList<Integer> previousFragId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        previousFragId = new ArrayList<>();
 
         friendsTabs = findViewById(R.id.friendsTabs);
         tab0 = friendsTabs.getTabAt(0);
@@ -53,19 +59,10 @@ public class MainActivity extends AppCompatActivity
         playerCountLimit[2] = 0;
         playerCountLimit[3] = 999;
 
-        mainSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+        getLoginData();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -77,7 +74,19 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // de default fragment (bij het opstarten) is home
+        previousFragId.add(0, R.id.nav_home);
         DisplayFragment(R.id.nav_home);
+    }
+
+    private void getLoginData() {
+        mainSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+        this.uuid = mainSharedPreferences.getString("uuid", null);
+        this.username = mainSharedPreferences.getString("nickname", null);
+        this.email = mainSharedPreferences.getString("email", null);
+        this.firstName = mainSharedPreferences.getString("firstName", "None");
+        this.lastName = mainSharedPreferences.getString("lastName", "None");
+        this.key = mainSharedPreferences.getString("key", null);
+        this.activactionCode = mainSharedPreferences.getString("activationCode", null);
     }
 
     @Override
@@ -96,6 +105,9 @@ public class MainActivity extends AppCompatActivity
         } else if (f instanceof FragFriendsInfo) {
             Fragment fragment = new FragContacts();
             executeFragmentTransaction(fragment);
+        } else if (previousFragId.size() > 1) {
+            previousFragId.remove(0);
+            DisplayFragment(previousFragId.get(0));
         }
     }
 
@@ -153,10 +165,12 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
         Fragment fragment = null;
 
         if (id == R.id.action_settings) {
             fragment = new FragSettings();
+            previousFragId.add(0, R.id.nav_settings);
         } else if (id == R.id.action_logOut) {
             logOut();
         }
@@ -170,8 +184,9 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-
-        DisplayFragment(item.getItemId());
+        int id = item.getItemId();
+        previousFragId.add(0, id);
+        DisplayFragment(id);
         return true;
     }
 
@@ -179,8 +194,8 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences loginSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
         SharedPreferences.Editor loginEditor = loginSharedPreferences.edit();
 
-        loginEditor.putBoolean("stayLogged", false);
-        loginEditor.commit();
+        loginEditor.clear();
+        loginEditor.apply();
 
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
