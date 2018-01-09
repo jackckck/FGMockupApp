@@ -52,41 +52,6 @@ public class FragBase extends Fragment {
         }
     }
 
-    // om de relativelayout van alle achtergronden te vinden. een beetje clunky. waarschijnlijk
-    // wordt night mode anders geïmplementeerd later
-    public RelativeLayout getRelativeLayout(String s) {
-        RelativeLayout rl = null;
-
-        switch (s) {
-            case "blocked":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundBlocked);
-                break;
-            case "favourites":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundFavourites);
-                break;
-            case "friends":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundFriends);
-                break;
-            case "home":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundHome);
-                break;
-            case "myServers":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundMyServers);
-                break;
-            case "profile":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundProfile);
-                break;
-            case "serverBrowser":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundServerBrowser);
-                break;
-            case "settings":
-                rl = (RelativeLayout) getActivity().findViewById(R.id.backgroundSettings);
-                break;
-        }
-
-        return rl;
-    }
-
     public JSONArray getJSONarrayFromString(String s) {
         try {
             JSONArray res = new JSONArray(s);

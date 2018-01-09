@@ -21,7 +21,6 @@ public class FragHome extends FragBase {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        changeBackGroundColor(getRelativeLayout("home"), nightModeCheck());
         super.onViewCreated(view, savedInstanceState);
     }
 }

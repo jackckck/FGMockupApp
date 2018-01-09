@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:layout_marginTop="@dimen/tendp"
+        android:text="min:"
+        android:textSize="15sp" />
+
+    <EditText
+        android:id="@+id/pref_playercount_min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fivedp"
+        android:ems="2"
+        android:inputType="number"
+        android:maxLength="3" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/fivedp"
+        android:layout_marginTop="@dimen/tendp"
+        android:text="max:"
+        android:textSize="15sp" />
+
+    <EditText
+        android:id="@+id/pref_playercount_max"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fivedp"
+        android:ems="2"
+        android:inputType="number"
+        android:maxLength="3" />
+
+</LinearLayout>

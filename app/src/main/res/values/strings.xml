@@ -12,4 +12,39 @@
     <string name="friends_tab_text_1">Friends</string>
     <string name="friends_tab_text_2">Pending</string>
     <string name="friends_tab_text_3">Blocked</string>
+
+    <!-- user preferences -->
+    <string name="pref_user_category_title">User settings</string>
+    <string name="pref_user_category_key">pref_user_category_key</string>
+
+    <string name="pref_email_visible_title">Email visible</string>
+    <string name="pref_email_visible_summary">Other users can see my email</string>
+    <string name="pref_email_visible_key">pref_email_visible_key</string>
+
+    <string name="pref_names_visible_title">Name visible</string>
+    <string name="pref_names_visible_summary">Other users can see my first and last name</string>
+    <string name="pref_names_visible_key">pref_names_visible_key</string>
+
+    <!-- server preferences -->
+    <string name="pref_servers_category_title">Server settings</string>
+    <string name="pref_servers_category_key">pref_server_category_key</string>
+
+    <string name="pref_servers_filter_subscreen_title">Server filter</string>
+    <string name="pref_servers_filter_subscreen_key">pref_servers_filter_subscreen_key</string>
+
+    <string name="pref_servers_filter_subscreen_playercount_title">Limit playercount</string>
+    <string name="pref_servers_filter_subscreen_playercount_summary"></string>
+    <string name="pref_servers_filter_subscreen_playercount_key">pref_playercount_key</string>
+
+    <string name="pref_servers_filter_subscreen_playercap_title">Limit playercap</string>
+    <string name="pref_servers_filter_subscreen_playercap_summary"></string>
+    <string name="pref_servers_filter_subscreen_playercap_key">pref_playercap_key</string>
+
+    <string name="pref_servers_filter_subscreen_hide_empty_title">Hide empty servers</string>
+    <string name="pref_servers_filter_subscreen_hide_empy_summary"></string>
+    <string name="pref_servers_filter_subscreen_hide_empty_key">pref_hide_empty_key</string>
+
+    <string name="pref_servers_filter_subscreen_hide_full_title">Hide full servers</string>
+    <string name="pref_servers_filter_subscreen_hide_full_summary"></string>
+    <string name="pref_servers_filter_subscreen_hide_full_key">pref_hide_full_key</string>
 </resources>

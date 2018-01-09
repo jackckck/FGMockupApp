@@ -21,7 +21,6 @@ public class FragFavourites extends FragBase {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        changeBackGroundColor(getRelativeLayout("favourites"), nightModeCheck());
         super.onViewCreated(view, savedInstanceState);
     }
 }

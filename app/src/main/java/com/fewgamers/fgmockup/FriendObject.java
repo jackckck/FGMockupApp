@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 public class FriendObject {
     private String friendName, friendEMail, firstName, lastName, friendStatus;
-    private Boolean isFriend = false;
     private Integer unreadCount;
 
     public FriendObject() {
@@ -30,10 +29,8 @@ public class FriendObject {
 
             if (myUsername.equals(userOne)) {
                 this.friendName = userTwo;
-                this.isFriend = true;
             } else if (myUsername.equals(userTwo)) {
                 this.friendName = userOne;
-                this.isFriend = true;
             } else {
                 return;
             }
@@ -63,10 +60,6 @@ public class FriendObject {
 
     public String getLastName() {
         return lastName;
-    }
-
-    public Boolean isMyFriend() {
-        return isFriend;
     }
 
     public Integer getUnreadCount() {

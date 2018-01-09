@@ -11,6 +11,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -43,6 +46,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -66,6 +70,10 @@ public class FragServerBrowser extends ListFragBase {
 
     String serverListString;
 
+    Integer[] playerLimits;
+
+    Boolean hideEmpty, hideFull;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -80,11 +88,13 @@ public class FragServerBrowser extends ListFragBase {
 
         mainActivity = (MainActivity) getActivity();
 
+        getFilterPreferences();
+
         //checkt of er al een serverlist gedownload is.
         if (mainActivity.hasServerListStored) {
             extractServerListFromJSONString(mainActivity.completeServerListString);
         } else {
-            makeStringRequest(requestQueue, "https://www.fewgamers.com/api/server/");
+            requestServerList(requestQueue, "https://www.fewgamers.com/api/server/");
         }
 
         // alles hieronder is voor buttons en edittexts
@@ -240,7 +250,7 @@ public class FragServerBrowser extends ListFragBase {
         searchFilter(searchBar.getText().toString().toLowerCase());
     }
 
-    private void makeStringRequest(RequestQueue queue, String url) {
+    private void requestServerList(RequestQueue queue, String url) {
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -284,7 +294,7 @@ public class FragServerBrowser extends ListFragBase {
         } catch (JSONException exception) {
             Log.e("Server list not found", "Something went wrong when loading server data");
         } catch (NullPointerException exception) {
-            Log.d("dit hadden we wel:", jsonString);
+            Log.d("dit hadden we wel", jsonString);
         }
 
         ArrayList<ServerObject> resAlphabetical = new ArrayList<>();
@@ -301,12 +311,11 @@ public class FragServerBrowser extends ListFragBase {
                 Log.e("Server data missing", "Some property of the server object could not be found inside the JSON string.");
             }
 
-            Integer livePlayer, maxPlayer;
-            livePlayer = serverObject.getLivePlayer();
-            maxPlayer = serverObject.getMaxPlayer();
-            Integer[] playerCountLimit = mainActivity.playerCountLimit;
+            Integer playerCount, playerCap;
+            playerCount = serverObject.getLivePlayer();
+            playerCap = serverObject.getMaxPlayer();
 
-            if (playerCountLimit[0] <= livePlayer && livePlayer < playerCountLimit[1] && playerCountLimit[2] <= maxPlayer && maxPlayer < playerCountLimit[3]) {
+            if (passesFilter(playerCount, playerCap)) {
                 Integer j = successCounter - 1;
 
                 while (j > -1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
@@ -331,5 +340,49 @@ public class FragServerBrowser extends ListFragBase {
         return map;
     }
 
+    private void getFilterPreferences() {
+        playerLimits = new Integer[4];
+        String[] strings0, strings1;
 
+        SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        strings0 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercount_key), "null-null").split("-");
+        strings1 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null_null").split("-");
+
+        if (strings0[0].equals("null")) {
+            playerLimits[0] = -1;
+        } else {
+            playerLimits[0] = Integer.parseInt(strings0[0]);
+        }
+        if (strings0[1].equals("null")) {
+            playerLimits[1] = 1000;
+        } else {
+            playerLimits[1] = Integer.parseInt(strings0[1]);
+        }
+        if (strings1[0].equals("null")) {
+            playerLimits[2] = -1;
+        } else {
+            playerLimits[2] = Integer.parseInt(strings1[0]);
+        }
+        if (strings1[1].equals("null")) {
+            playerLimits[3] = 1000;
+        } else {
+            playerLimits[3] = Integer.parseInt(strings0[1]);
+        }
+
+        hideEmpty = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_empty_key), false);
+        hideFull = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_full_key), false);
+    }
+
+    private boolean passesFilter(Integer playerCount, Integer playerCap) {
+        if (hideEmpty && playerCount.equals(0)) {
+            return false;
+        }
+        if (hideFull && playerCount.equals(playerCap)) {
+            return false;
+        }
+        if (playerCount < playerLimits[0] || playerLimits[1] < playerCount || playerCap < playerLimits[2] || playerLimits[3] < playerCap) {
+            return false;
+        }
+        return true;
+    }
 }

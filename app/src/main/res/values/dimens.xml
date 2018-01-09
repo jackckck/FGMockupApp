@@ -11,10 +11,11 @@
 
     <dimen name="fourdp">4dp</dimen>
     <dimen name="fivedp">5dp</dimen>
+    <dimen name="eightdp">8dp</dimen>
     <dimen name="tendp">10dp</dimen>
     <dimen name="twelvedp">12dp</dimen>
     <dimen name="fifteendp">15dp</dimen>
-    <dimen name="eightdp">8dp</dimen>
+    <dimen name="twentydp">20dp</dimen>
 
     <dimen name="register_vertical_spacing">12dp</dimen>
 

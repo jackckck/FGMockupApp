@@ -18,7 +18,7 @@ public class ServerObject {
             this.game = jsonObject.getString("game");
             this.serverName = jsonObject.getString("name");
             //this.playerCount = jsonObject.getString("playercount");
-            this.playerCount = "0/0";
+            this.playerCount = "0/1";
             this.ip = jsonObject.getString("ip");
             this.userCreator = jsonObject.getString("creator");
         } catch (JSONException j) {

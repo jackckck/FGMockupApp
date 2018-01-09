@@ -16,10 +16,6 @@ import java.util.ArrayList;
  */
 
 public class FragMyServers extends ListFragBase {
-    ArrayList<ServerObject> myServersList;
-
-    ServerListAdapter myServersAdapter;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -29,7 +25,5 @@ public class FragMyServers extends ListFragBase {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
     }
 }

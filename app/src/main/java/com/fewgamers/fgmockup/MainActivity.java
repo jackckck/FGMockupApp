@@ -5,9 +5,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -20,11 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.RelativeLayout;
-
-import com.android.volley.RequestQueue;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -41,6 +34,9 @@ public class MainActivity extends AppCompatActivity
     public SharedPreferences mainSharedPreferences;
 
     public TabLayout friendsTabs;
+    public TabLayout.Tab tab0, tab1, tab2;
+
+    public int friendsTabSelected, userTabSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +44,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         friendsTabs = findViewById(R.id.friendsTabs);
+        tab0 = friendsTabs.getTabAt(0);
+        tab1 = friendsTabs.getTabAt(1);
+        tab2 = friendsTabs.getTabAt(2);
 
         playerCountLimit[0] = 0;
         playerCountLimit[1] = 999;
@@ -86,15 +85,16 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+            return;
         }
 
         Fragment f = this.getFragmentManager().findFragmentById(R.id.MyFrameLayout);
 
-        if (f instanceof FragServerInfo) {
+        if (f instanceof FragServerInfo || f instanceof FragServerBrowserFilter) {
             Fragment fragment = new FragServerBrowser();
             executeFragmentTransaction(fragment);
         } else if (f instanceof FragFriendsInfo) {
-            Fragment fragment = new FragFriends();
+            Fragment fragment = new FragContacts();
             executeFragmentTransaction(fragment);
         }
     }
@@ -113,24 +113,16 @@ public class MainActivity extends AppCompatActivity
         friendsTabs.setVisibility(View.GONE);
 
         switch (id) {
-            case R.id.nav_blocked:
-                fragment = new FragBlocked();
-                break;
-            case R.id.nav_favourites:
-                fragment = new FragFavourites();
-                break;
-            case R.id.nav_friends:
-                fragment = new FragFriends();
-                friendsTabs.setVisibility(View.VISIBLE);
+            case R.id.nav_contacts:
+                fragment = new FragContacts();
+                setTabNames("Friends");
                 break;
             case R.id.nav_home:
                 fragment = new FragHome();
                 break;
-            case R.id.nav_myservers:
-                fragment = new FragMyServers();
-                break;
             case R.id.nav_profile:
-                fragment = new FragProfile();
+                fragment = new FragUser();
+                setTabNames("User");
                 break;
             case R.id.nav_server_browser:
                 fragment = new FragServerBrowser();
@@ -163,12 +155,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         Fragment fragment = null;
 
-        if (id == R.id.action_exit0 || id == R.id.action_exit1) {
-            finish();
-        } else if (id == R.id.action_settings0 || id == R.id.action_settings1) {
+        if (id == R.id.action_settings) {
             fragment = new FragSettings();
-        } else if (id == R.id.action_profile) {
-            fragment = new FragProfile();
         } else if (id == R.id.action_logOut) {
             logOut();
         }
@@ -197,5 +185,19 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void setTabNames(String s) {
+        friendsTabs.setVisibility(View.VISIBLE);
+        if (s.equals("Friends")) {
+            tab0.setText("Friends");
+            tab1.setText("Pending");
+            tab2.setText("Blocked");
+        }
+        if (s.equals("User")) {
+            tab0.setText("Profile");
+            tab1.setText("My servers");
+            tab2.setText("Favourites");
+        }
     }
 }

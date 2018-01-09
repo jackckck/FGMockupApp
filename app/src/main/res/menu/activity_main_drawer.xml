@@ -7,44 +7,24 @@
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_menu_home"
         android:title="Home" />
+    <item
+        android:id="@+id/nav_server_browser"
+        android:icon="@drawable/ic_menu_list"
+        android:title="Browser" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_menu_profile"
+        android:title="User" />
+
+    <item
+        android:id="@+id/nav_contacts"
+        android:icon="@drawable/ic_menu_contacts"
+        android:title="Contacts" />
 
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_menu_settings"
         android:title="Settings" />
-
-    <item android:title="Social">
-        <menu>
-            <item
-                android:id="@+id/nav_profile"
-                android:icon="@drawable/ic_menu_profile"
-                android:title="Profile" />
-            <item
-                android:id="@+id/nav_friends"
-                android:icon="@drawable/ic_menu_friend"
-                android:title="Friends" />
-            <item
-                android:id="@+id/nav_blocked"
-                android:icon="@drawable/ic_menu_block"
-                android:title="Blocked" />
-        </menu>
-    </item>
-
-    <item android:title="Servers">
-        <menu>
-            <item
-                android:id="@+id/nav_server_browser"
-                android:icon="@drawable/ic_menu_list"
-                android:title="Browser"/>
-            <item
-                android:id="@+id/nav_favourites"
-                android:icon="@drawable/ic_menu_star"
-                android:title="Favourites" />
-            <item
-                android:id="@+id/nav_myservers"
-                android:icon="@drawable/ic_menu_myservers"
-                android:title="My servers" />
-        </menu>
-    </item>
 
 </menu>

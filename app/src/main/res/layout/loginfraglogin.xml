@@ -4,22 +4,22 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/userName"
+        android:id="@+id/loginEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="103dp"
         android:ems="10"
-        android:hint="Username"
+        android:hint="Email"
         android:inputType="textPersonName" />
 
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/loginPass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/userName"
-        android:layout_below="@+id/userName"
+        android:layout_alignStart="@+id/loginEmail"
+        android:layout_below="@+id/loginEmail"
         android:layout_marginTop="50dp"
         android:ems="10"
         android:hint="Password"
@@ -29,8 +29,8 @@
         android:id="@+id/loginCheck"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@id/password"
-        android:layout_below="@+id/password"
+        android:layout_alignStart="@id/loginPass"
+        android:layout_below="@+id/loginPass"
         android:layout_marginTop="12dp"
         android:text="Stay logged in" />
 
@@ -54,7 +54,7 @@
         android:id="@+id/passwordVisibilityButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/password"
-        android:layout_toRightOf="@id/password"
+        android:layout_alignBottom="@id/loginPass"
+        android:layout_toRightOf="@id/loginPass"
         android:src="@drawable/ic_login_visibility_off" />
 </RelativeLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.fewgamers.fgmockup.PlayerCountPreference
+        android:defaultValue="null-null"
+        android:key="@string/pref_servers_filter_subscreen_playercount_key"
+        android:title="@string/pref_servers_filter_subscreen_playercount_title" />
+
+    <com.fewgamers.fgmockup.PlayerCountPreference
+        android:defaultValue="null-null"
+        android:key="@string/pref_servers_filter_subscreen_playercap_key"
+        android:title="@string/pref_servers_filter_subscreen_playercap_title" />
+
+    <CheckBoxPreference
+        android:key="@string/pref_servers_filter_subscreen_hide_empty_key"
+        android:title="@string/pref_servers_filter_subscreen_hide_empty_title" />
+
+    <CheckBoxPreference
+        android:key="@string/pref_servers_filter_subscreen_hide_full_key"
+        android:title="@string/pref_servers_filter_subscreen_hide_full_title" />
+
+</PreferenceScreen>

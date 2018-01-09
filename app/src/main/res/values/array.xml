@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_names_visible_entries">
+        <item>Visible</item>
+        <item>First name only</item>
+        <item>Last name only</item>
+        <item>Invisible</item>
+    </string-array>
+</resources>
