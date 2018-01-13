@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -18,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 
@@ -29,7 +28,7 @@ public class MainActivity extends AppCompatActivity
     public String serverSearchFilter;
     public boolean hasServerListStored, hasFriendListStored;
 
-    public String uuid, username, email, firstName, lastName, key, activactionCode;
+    public String uuid, username, email, firstName, lastName, key, activactionCode, urlKey;
 
     public Integer[] playerCountLimit = new Integer[4];
 
@@ -41,6 +40,8 @@ public class MainActivity extends AppCompatActivity
     public int friendsTabSelected, userTabSelected;
 
     private ArrayList<Integer> previousFragId;
+
+    public ProgressBar mainProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity
 
         getLoginData();
 
+        mainProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -87,6 +89,8 @@ public class MainActivity extends AppCompatActivity
         this.lastName = mainSharedPreferences.getString("lastName", "None");
         this.key = mainSharedPreferences.getString("key", null);
         this.activactionCode = mainSharedPreferences.getString("activationCode", null);
+
+        this.urlKey = "&key=" + this.key;
     }
 
     @Override
@@ -102,7 +106,7 @@ public class MainActivity extends AppCompatActivity
         if (f instanceof FragServerInfo || f instanceof FragServerBrowserFilter) {
             Fragment fragment = new FragServerBrowser();
             executeFragmentTransaction(fragment);
-        } else if (f instanceof FragFriendsInfo) {
+        } else if (f instanceof FragUserInfo) {
             Fragment fragment = new FragContacts();
             executeFragmentTransaction(fragment);
         } else if (previousFragId.size() > 1) {
@@ -123,6 +127,7 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
 
         friendsTabs.setVisibility(View.GONE);
+        mainProgressBar.setVisibility(View.GONE);
 
         switch (id) {
             case R.id.nav_contacts:

@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.lang.reflect.Array;
 import java.util.HashSet;
@@ -16,11 +17,11 @@ import java.util.Set;
  * Created by Administrator on 1/7/2018.
  */
 
-public class PlayerCountPreference extends DialogPreference {
+public class PrefPlayerCount extends DialogPreference {
     private String minPlayerString, maxPlayerString;
     private EditText minPlayer, maxPlayer;
 
-    public PlayerCountPreference(Context context, AttributeSet attrs) {
+    public PrefPlayerCount(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         minPlayerString = "null";
@@ -35,11 +36,9 @@ public class PlayerCountPreference extends DialogPreference {
 
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
-        Log.d("initialvalue", "hij wordt gecalld!");
         String[] array;
         if (restorePersistedValue) {
             array = getPersistedString("null-null").split("-");
-            Log.d("persisto", "persisten is gelukt!");
         } else {
             array = defaultValue.toString().split("-");
             Log.d("defaulto", defaultValue.toString());

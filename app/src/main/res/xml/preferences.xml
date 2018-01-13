@@ -4,17 +4,40 @@
         android:key="@string/pref_user_category_key"
         android:title="@string/pref_user_category_title">
 
-        <CheckBoxPreference
-            android:key="@string/pref_email_visible_key"
-            android:summary="@string/pref_email_visible_summary"
-            android:title="@string/pref_email_visible_title" />
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/pref_names_visible_entries"
-            android:entryValues="@array/pref_names_visible_entries"
-            android:key="@string/pref_names_visible_key"
-            android:summary="@string/pref_names_visible_summary"
-            android:title="@string/pref_names_visible_title" />
+        <PreferenceScreen
+            android:key="@string/pref_user_privacy_subscreen_key"
+            android:title="@string/pref_user_privacy_subscreen_title">
+
+            <CheckBoxPreference
+                android:key="@string/pref_email_visible_key"
+                android:summary="@string/pref_email_visible_summary"
+                android:title="@string/pref_email_visible_title" />
+            <ListPreference
+                android:defaultValue="0"
+                android:entries="@array/pref_names_visible_entries"
+                android:entryValues="@array/pref_names_visible_entries"
+                android:key="@string/pref_names_visible_key"
+                android:summary="@string/pref_names_visible_summary"
+                android:title="@string/pref_names_visible_title" />
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:key="@string/pref_user_account_subscreen_key"
+            android:title="@string/pref_user_account_subscreen_title">
+
+            <com.fewgamers.fgmockup.PrefChangeUserInfo
+                android:key="@string/pref_user_change_email_key"
+                android:title="@string/pref_user_change_email_title" />
+            <com.fewgamers.fgmockup.PrefChangeUserInfo
+                android:key="@string/pref_user_change_username_key"
+                android:title="@string/pref_user_change_username_title" />
+            <com.fewgamers.fgmockup.PrefChangeUserInfo
+                android:key="@string/pref_user_change_firstname_key"
+                android:title="@string/pref_user_change_firstname_title" />
+            <com.fewgamers.fgmockup.PrefChangeUserInfo
+                android:key="@string/pref_user_change_lastname_key"
+                android:title="@string/pref_user_change_lastname_title" />
+        </PreferenceScreen>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -26,12 +49,12 @@
             android:persistent="false"
             android:title="@string/pref_servers_filter_subscreen_title">
 
-            <com.fewgamers.fgmockup.PlayerCountPreference
+            <com.fewgamers.fgmockup.PrefPlayerCount
                 android:defaultValue="null-null"
                 android:key="@string/pref_servers_filter_subscreen_playercount_key"
                 android:title="@string/pref_servers_filter_subscreen_playercount_title" />
 
-            <com.fewgamers.fgmockup.PlayerCountPreference
+            <com.fewgamers.fgmockup.PrefPlayerCount
                 android:defaultValue="null-null"
                 android:key="@string/pref_servers_filter_subscreen_playercap_key"
                 android:title="@string/pref_servers_filter_subscreen_playercap_title" />
@@ -43,6 +66,10 @@
             <CheckBoxPreference
                 android:key="@string/pref_servers_filter_subscreen_hide_full_key"
                 android:title="@string/pref_servers_filter_subscreen_hide_full_title" />
+
+            <com.fewgamers.fgmockup.PrefGameFilter
+                android:key="@string/pref_servers_filter_subscreen_game_filter_key"
+                android:title="@string/pref_servers_filter_subscreen_game_filter_title" />
 
         </PreferenceScreen>
     </PreferenceCategory>

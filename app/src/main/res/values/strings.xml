@@ -17,6 +17,24 @@
     <string name="pref_user_category_title">User settings</string>
     <string name="pref_user_category_key">pref_user_category_key</string>
 
+    <string name="pref_user_privacy_subscreen_title">Privacy</string>
+    <string name="pref_user_privacy_subscreen_key">pref_user_privacy_subscreen_key</string>
+
+    <string name="pref_user_account_subscreen_title">Account</string>
+    <string name="pref_user_account_subscreen_key">pref_user_account_subscreen_key</string>
+
+    <string name="pref_user_change_username_title">Change username</string>
+    <string name="pref_user_change_username_key">pref_user_change_username_key</string>
+
+    <string name="pref_user_change_email_title">Change email</string>
+    <string name="pref_user_change_email_key">pref_user_change_email_key</string>
+
+    <string name="pref_user_change_firstname_title">Change first name</string>
+    <string name="pref_user_change_firstname_key">pref_user_change_firstname_key</string>
+
+    <string name="pref_user_change_lastname_title">Change last name</string>
+    <string name="pref_user_change_lastname_key">pref_user_change_lastname_key</string>
+
     <string name="pref_email_visible_title">Email visible</string>
     <string name="pref_email_visible_summary">Other users can see my email</string>
     <string name="pref_email_visible_key">pref_email_visible_key</string>
@@ -47,4 +65,10 @@
     <string name="pref_servers_filter_subscreen_hide_full_title">Hide full servers</string>
     <string name="pref_servers_filter_subscreen_hide_full_summary"></string>
     <string name="pref_servers_filter_subscreen_hide_full_key">pref_hide_full_key</string>
+
+    <string name="pref_servers_filter_subscreen_game_filter_title">Sort by game</string>
+    <string name="pref_servers_filter_subscreen_game_filter_key">pref_game_filter_key</string>
+
+    <string name="pref_servers_filter_subscreen_open_picker_title">Sort by game</string>
+    <string name="pref_servers_filter_subscreen_open_picker_summary"></string>
 </resources>

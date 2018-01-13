@@ -28,7 +28,7 @@ public class FGAsyncTask extends AsyncTask<String, Void, String> {
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod(strings[2]);
             connection.setDoOutput(true);
             DataOutputStream streamOut = new DataOutputStream(connection.getOutputStream());
 

@@ -1,12 +1,9 @@
 package com.fewgamers.fgmockup;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.ListFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,8 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -31,14 +26,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,39 +39,58 @@ import java.util.Map;
  */
 
 public class FragContacts extends ListFragBase {
-    ArrayList<FriendObject> contactsList;
+    ArrayList<ContactObject> currentContactsList, friendsList, pendingList, blockedList;
 
-    String[] friendLongClickOptionsList = new String[2];
+    String[] friendLongClickOptionsList = new String[3];
+    String[] pendingLongClickOptionsList = new String[3];
+    String[] blockedLongClickOptionsList = new String[1];
 
     FriendListAdapter friendAdapter;
 
-    String thisUser = "dfaeb3cd-d796-48a0-a7c6-442cd1764dfa";
+    String thisUser = "082894cf-2c7c-4b30-87ff-806792804dfe";
 
     MainActivity mainActivity;
 
-    Map<String, ArrayList<FriendObject>> contactsListMap;
+    Map<String, ArrayList<ContactObject>> contactsListMap;
 
     TabLayout.OnTabSelectedListener conctactsTabsSelect;
 
     private boolean notReady = true;
 
+    RequestQueue contactsQueue;
+
+    int contactsCount = 0;
+    int addedCount = 0;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragfriends, container, false);
+        return inflater.inflate(R.layout.fragcontacts, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        contactsQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+        currentContactsList = new ArrayList<>();
+        friendsList = new ArrayList<>();
+        pendingList = new ArrayList<>();
+        blockedList = new ArrayList<>();
+
         mainActivity = (MainActivity) getActivity();
+        // laden begint
+        mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
+
         mainActivity.friendsTabs.setVisibility(View.VISIBLE);
 
         friendLongClickOptionsList[1] = "Chat history";
+        friendLongClickOptionsList[2] = "Remove friend";
+        pendingLongClickOptionsList[1] = "Accept";
 
         if (mainActivity.hasFriendListStored) {
-            extractContactsListFromString(mainActivity.completeContactsListString);
+            makeContactsLists(mainActivity.completeContactsListString);
         } else {
-            new friendsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + thisUser, "https://fewgamers.com/api/userrelation/?user2=" + thisUser);
+            new contactsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + thisUser + mainActivity.urlKey,
+                    "https://fewgamers.com/api/userrelation/?user2=" + thisUser + mainActivity.urlKey);
         }
 
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -86,7 +98,23 @@ public class FragContacts extends ListFragBase {
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                 AlertDialog.Builder friendClickOptionsBuilder = new AlertDialog.Builder(getActivity());
 
-                friendLongClickOptionsList[0] = contactsList.get(position).getFriendName() + "'s profile";
+                String[] optionsList;
+                String openProfileOption = currentContactsList.get(position).getUsername() + "'s profile";
+                friendLongClickOptionsList[0] = openProfileOption;
+                pendingLongClickOptionsList[2] = openProfileOption;
+                String thirdOption = "";
+                switch (currentContactsList.get(position).getStatus()) {
+                    case "FA":
+                        thirdOption = "Remove friend";
+                        break;
+                    case "FP":
+                        thirdOption = "Accept friend request";
+                        break;
+                    case "B":
+                        thirdOption = "Unblock";
+                        break;
+                }
+                friendLongClickOptionsList[2] = thirdOption;
 
                 friendClickOptionsBuilder.setItems(friendLongClickOptionsList, new DialogInterface.OnClickListener() {
                     @Override
@@ -112,18 +140,18 @@ public class FragContacts extends ListFragBase {
                 if (notReady) {
                     return;
                 }
-                contactsList.clear();
+                currentContactsList.clear();
                 switch (tab.getPosition()) {
                     case 0:
-                        contactsList.addAll(contactsListMap.get("friends"));
+                        currentContactsList.addAll(friendsList);
                         mainActivity.friendsTabSelected = 0;
                         break;
                     case 1:
-                        contactsList.addAll(contactsListMap.get("pending"));
+                        currentContactsList.addAll(pendingList);
                         mainActivity.friendsTabSelected = 1;
                         break;
                     case 2:
-                        contactsList.addAll(contactsListMap.get("blocked"));
+                        currentContactsList.addAll(blockedList);
                         mainActivity.friendsTabSelected = 2;
                         break;
                 }
@@ -144,8 +172,8 @@ public class FragContacts extends ListFragBase {
     }
 
     private void openFriendProfile(int position) {
-        FragFriendsInfo fragment = new FragFriendsInfo();
-        fragment.setFriendUUID(contactsList.get(position).getFriendName());
+        FragUserInfo fragment = new FragUserInfo();
+        fragment.setFriendUUID(currentContactsList.get(position).getUsername());
 
         if (fragment != null) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -167,50 +195,108 @@ public class FragContacts extends ListFragBase {
     }
 
 
-    private Map<String, ArrayList<FriendObject>> makeContactsLists(String jsonString) {
+    private void makeContactsLists(String jsonString) {
         JSONArray jsonArray;
 
         try {
             jsonArray = new JSONArray(jsonString);
         } catch (JSONException exception) {
             Log.e("Server list not found", "Something went wrong when loading server data");
-            return null;
+            return;
         }
 
-        ArrayList<FriendObject> resFriends = new ArrayList<>();
-        ArrayList<FriendObject> resBlocked = new ArrayList<>();
-        ArrayList<FriendObject> resPending = new ArrayList<>();
-
+        ArrayList<String[]> allRelations = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                FriendObject friendObject = new FriendObject();
-                friendObject.defineFriend(jsonArray.getJSONObject(i), thisUser);
-
-                switch (friendObject.getFriendStatus()) {
-                    case "FA":
-                        resFriends.add(friendObject);
-                        break;
-                    case "B":
-                        resBlocked.add(friendObject);
-                        break;
-                    case "FP":
-                        resPending.add(friendObject);
-                        break;
+                String[] relation = extractRelation(jsonArray.getJSONObject(i));
+                if (!relation[0].equals("null")) {
+                    allRelations.add(relation);
                 }
             } catch (JSONException exception) {
                 Log.e("Friend object missing", "Friend object data incomplete");
             }
         }
-
-        Map<String, ArrayList<FriendObject>> resMap = new HashMap<>();
-        resMap.put("friends", resFriends);
-        resMap.put("pending", resPending);
-        resMap.put("blocked", resBlocked);
-
-        return resMap;
+        contactsCount = allRelations.size();
+        for (String[] relation : allRelations) {
+            addContact(relation[1], selectContactsList(relation[0]));
+        }
     }
 
-    private class friendsAsyncTask extends AsyncTask<String, Void, String> {
+    private String[] extractRelation(JSONObject userRelation) {
+        String contactUUID, user1, user2, relationStatus;
+        contactUUID = "";
+        user1 = "";
+        user2 = "";
+        relationStatus = "";
+        try {
+            user1 = removeHyphens(userRelation.getString("user1"));
+            user2 = removeHyphens(userRelation.getString("user2"));
+            relationStatus = userRelation.getString("status");
+        } catch (JSONException exception) {
+        }
+        if (thisUser.equals(user1)) {
+            if (relationStatus.equals("FP")) {
+                relationStatus = "null";
+            } else {
+                contactUUID = user2;
+            }
+        } else if (thisUser.equals(user2)) {
+            if (relationStatus.equals("B")) {
+                relationStatus = "null";
+            } else {
+                contactUUID = user1;
+            }
+        }
+        String[] res = new String[2];
+        res[0] = relationStatus;
+        res[1] = contactUUID;
+        return res;
+    }
+
+    private ArrayList<ContactObject> selectContactsList(String relationStatus) {
+        ArrayList<ContactObject> res;
+        switch (relationStatus) {
+            case "FA":
+                return friendsList;
+            case "FP":
+                return pendingList;
+            case "B":
+                return blockedList;
+            default:
+                return null;
+        }
+    }
+
+
+    private void addContact(String contactUUID, final ArrayList<ContactObject> selectedList) {
+        if (selectedList == null) {
+            return;
+        }
+        contactsQueue.add(new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?uuid=" + contactUUID + mainActivity.urlKey, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                ContactObject contactObject = new ContactObject();
+                contactObject.defineContact(response);
+                selectedList.add(contactObject);
+
+                checkIfDone();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        }));
+    }
+
+    private void checkIfDone() {
+        if (addedCount + 1 == contactsCount) {
+            displayContactsList();
+        } else {
+            addedCount++;
+        }
+    }
+
+    private class contactsAsyncTask extends AsyncTask<String, Void, String> {
         String response = "";
 
         @Override
@@ -260,35 +346,35 @@ public class FragContacts extends ListFragBase {
 
         @Override
         protected void onPostExecute(String response) {
-            String contactsListString = formatStringToJSONArray(response);
-            Log.d("formattedstring", contactsListString);
+            Log.d("formattedstring", response);
 
-            extractContactsListFromString(contactsListString);
+            makeContactsLists(response);
+
+            mainActivity.completeContactsListString = response;
+            mainActivity.hasFriendListStored = true;
         }
     }
 
-    private void extractContactsListFromString(String contactsListString) {
-        contactsListMap = makeContactsLists(contactsListString);
-
+    private void displayContactsList() {
+        Log.d("Display method", "De display method wordt aangeroepen.");
         switch (mainActivity.friendsTabSelected) {
             case 0:
-                contactsList = new ArrayList<>(contactsListMap.get("friends"));
+                currentContactsList.addAll(friendsList);
                 break;
             case 1:
-                contactsList = new ArrayList<>(contactsListMap.get("pending"));
+                currentContactsList.addAll(pendingList);
                 break;
             case 2:
-                contactsList = new ArrayList<>(contactsListMap.get("blocked"));
+                currentContactsList.addAll(blockedList);
                 break;
         }
-
-        friendAdapter = new FriendListAdapter(getActivity(), contactsList);
+        friendAdapter = new FriendListAdapter(getActivity(), currentContactsList);
         setListAdapter(friendAdapter);
 
-        notReady = false;
+        // laden is voorbij
+        mainActivity.mainProgressBar.setVisibility(View.GONE);
 
-        mainActivity.completeContactsListString = contactsListString;
-        mainActivity.hasFriendListStored = true;
+        notReady = false;
     }
 
     public void removeTabsSelector() {

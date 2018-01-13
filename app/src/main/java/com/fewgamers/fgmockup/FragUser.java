@@ -58,6 +58,8 @@ public class FragUser extends ListFragBase {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivity = (MainActivity) getActivity();
+        // laden begint
+        mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
 
         usernameDisplay = mainActivity.findViewById(R.id.friendsInfoUsernameDisplay);
         emailDisplay = mainActivity.findViewById(R.id.friendsInfoEMailDisplay);
@@ -71,12 +73,7 @@ public class FragUser extends ListFragBase {
 
         setUserDisplays();
 
-        userServerList = new ArrayList<>();
-        myServersList = new ArrayList<>();
         favServersList = new ArrayList<>();
-
-        userAdapter = new ServerListAdapter(getActivity(), userServerList);
-        setListAdapter(userAdapter);
 
         final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
@@ -145,11 +142,27 @@ public class FragUser extends ListFragBase {
     }
 
     private void requestMyServers(RequestQueue requestQueue, String uuid) {
-        String urlString = "https://fewgamers.com/api/server/?uuid=" + uuid;
+        String urlString = "https://fewgamers.com/api/server/?uuid=" + uuid + mainActivity.urlKey;
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, urlString, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                myServersList = getMyServerListFromString(formatStringToJSONArray(response));
+                myServersList = getMyServerListFromString(response);
+
+                switch (mainActivity.userTabSelected) {
+                    case 1:
+                        userServerList = new ArrayList<>(myServersList);
+                        break;
+                    case 2:
+                        userServerList = new ArrayList<>(favServersList);
+                        break;
+                    default:
+                        userServerList = new ArrayList<>();
+                }
+                userAdapter = new ServerListAdapter(getActivity(), userServerList);
+                setListAdapter(userAdapter);
+
+                // laden is voorbij
+                mainActivity.mainProgressBar.setVisibility(View.GONE);
             }
         }, new Response.ErrorListener() {
             @Override

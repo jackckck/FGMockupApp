@@ -1,6 +1,5 @@
 package com.fewgamers.fgmockup;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,22 +16,12 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -48,7 +36,7 @@ import static android.util.Base64.*;
  * Created by Administrator on 12/30/2017.
  */
 
-public class LoginFragLogin extends android.support.v4.app.Fragment {
+public class AuthFragLogin extends android.support.v4.app.Fragment {
     EditText emailEdit, passEdit;
     Button login;
     ImageButton visibility;
@@ -66,7 +54,7 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.loginfraglogin, container, false);
+        return inflater.inflate(R.layout.authfraglogin, container, false);
     }
 
     @Override
@@ -126,6 +114,10 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
     }
 
     private void checkLogin() {
+        // later weghalen !!!
+        allowAccess();
+        /// later weghalen!!!
+
         email = emailEdit.getText().toString();
         pass = passEdit.getText().toString();
 
@@ -141,7 +133,10 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
         }
 
         loginDataString = loginData.toString();
-        encryptedLoginDataString = loginEncrypt(loginDataString);
+
+        //encryptedLoginDataString = loginEncrypt(loginDataString);
+        FGEncrypt encryptor = new FGEncrypt();
+        encryptedLoginDataString = encryptor.encrypt(loginDataString);
 
         try {
             finalLogin.put("logindata", encryptedLoginDataString);
@@ -151,7 +146,7 @@ public class LoginFragLogin extends android.support.v4.app.Fragment {
 
         Log.d("encrypto", finalLogin.toString());
 
-        new LoginAsyncTask().execute("https://fewgamers.com/api/login/", finalLogin.toString());
+        new LoginAsyncTask().execute("https://fewgamers.com/api/login/", finalLogin.toString(), "POST");
     }
 
     private String makeLoginJSONString(String name, String pass) {

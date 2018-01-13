@@ -15,6 +15,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +57,7 @@ import java.util.prefs.Preferences;
 // hier komt de server browser. momenteel maakt hij al contact met onze server, maar hij levert nog niets zinnigs op
 public class FragServerBrowser extends ListFragBase {
     ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
+    FloatingActionButton fab;
 
     MainActivity mainActivity;
 
@@ -66,13 +69,13 @@ public class FragServerBrowser extends ListFragBase {
     Boolean sortingDirectionIsDown = true;
     Boolean isSortedAlphabetically = true;
 
-    Map<String, ArrayList<ServerObject>> serverListMap;
-
     String serverListString;
 
     Integer[] playerLimits;
 
     Boolean hideEmpty, hideFull;
+
+    boolean notReady;
 
     @Nullable
     @Override
@@ -86,8 +89,11 @@ public class FragServerBrowser extends ListFragBase {
         // requestview opgehaald.
         super.onViewCreated(view, savedInstanceState);
 
-        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
         mainActivity = (MainActivity) getActivity();
+        //begint het laden van de serverlist
+        mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
+
+        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
         getFilterPreferences();
 
@@ -95,12 +101,12 @@ public class FragServerBrowser extends ListFragBase {
         if (mainActivity.hasServerListStored) {
             extractServerListFromJSONString(mainActivity.completeServerListString);
         } else {
-            requestServerList(requestQueue, "https://www.fewgamers.com/api/server/");
+            requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.key);
         }
 
         // alles hieronder is voor buttons en edittexts
-        searchBar = (EditText) getActivity().findViewById(R.id.serverSearchBar);
-        filterButton = (ImageButton) getActivity().findViewById(R.id.serverFilterButton);
+        searchBar = (EditText) mainActivity.findViewById(R.id.serverSearchBar);
+        filterButton = (ImageButton) mainActivity.findViewById(R.id.serverFilterButton);
 
         searchBar.setText(mainActivity.serverSearchFilter);
 
@@ -143,7 +149,6 @@ public class FragServerBrowser extends ListFragBase {
             @Override
             public boolean onLongClick(View v) {
                 pickSortingMethod();
-
                 return true;
             }
         });
@@ -154,10 +159,21 @@ public class FragServerBrowser extends ListFragBase {
                 FragServerBrowserFilter fragment = new FragServerBrowserFilter();
 
                 if (fragment != null) {
+                    mainActivity.mainProgressBar.setVisibility(View.GONE);
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.MyFrameLayout, fragment);
                     ft.commit();
                 }
+            }
+        });
+
+        fab = (FloatingActionButton) mainActivity.findViewById(R.id.serverBrowserRefreshFAB);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                serverAdapter.clear();
+                mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
+                requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.key);
             }
         });
     }
@@ -177,6 +193,9 @@ public class FragServerBrowser extends ListFragBase {
     }
 
     private void searchFilter(String search) {
+        if (notReady) {
+            return;
+        }
         ArrayList<ServerObject> referenceList;
         if (isSortedAlphabetically) {
             referenceList = new ArrayList<ServerObject>(serverListAlphabetical);
@@ -253,12 +272,10 @@ public class FragServerBrowser extends ListFragBase {
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                serverListString = formatStringToJSONArray(response);
-
-                mainActivity.completeServerListString = serverListString;
+                mainActivity.completeServerListString = response;
                 mainActivity.hasServerListStored = true;
 
-                extractServerListFromJSONString(serverListString);
+                extractServerListFromJSONString(response);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -271,7 +288,7 @@ public class FragServerBrowser extends ListFragBase {
     }
 
     private void extractServerListFromJSONString(String jsonString) {
-        serverListMap = makeServerList(jsonString);
+        Map<String, ArrayList<ServerObject>> serverListMap = makeServerList(jsonString);
 
         serverListAlphabetical = serverListMap.get("Alphabetical");
         serverListByPlayers = serverListMap.get("Numerical");
@@ -284,6 +301,10 @@ public class FragServerBrowser extends ListFragBase {
 
         serverAdapter = new ServerListAdapter(getActivity(), serverList);
         setListAdapter(serverAdapter);
+
+        // laden is voorbij
+        mainActivity.mainProgressBar.setVisibility(View.GONE);
+        notReady = false;
     }
 
     private Map<String, ArrayList<ServerObject>> makeServerList(String jsonString) {
@@ -292,8 +313,6 @@ public class FragServerBrowser extends ListFragBase {
             jsonArray = new JSONArray(jsonString);
         } catch (JSONException exception) {
             Log.e("Server list not found", "Something went wrong when loading server data");
-        } catch (NullPointerException exception) {
-            Log.d("dit hadden we wel", jsonString);
         }
 
         ArrayList<ServerObject> resAlphabetical = new ArrayList<>();

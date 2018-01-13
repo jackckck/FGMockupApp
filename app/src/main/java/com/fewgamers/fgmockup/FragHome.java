@@ -12,7 +12,6 @@ import android.view.ViewGroup;
  */
 
 public class FragHome extends FragBase {
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
