@@ -14,12 +14,12 @@ import java.util.ArrayList;
  * Created by Administrator on 12/16/2017.
  */
 
-public class FriendListAdapter extends ArrayAdapter<ContactObject> {
+public class ContactsListAdapter extends ArrayAdapter<ContactObject> {
     private final Activity context;
     private final ArrayList<ContactObject> friendList;
 
-    public FriendListAdapter(Activity context, ArrayList<ContactObject> friendList) {
-        super(context, R.layout.friends_list_item, friendList);
+    public ContactsListAdapter(Activity context, ArrayList<ContactObject> friendList) {
+        super(context, R.layout.contact_list_item, friendList);
 
         this.context = context;
         this.friendList = friendList;
@@ -29,9 +29,10 @@ public class FriendListAdapter extends ArrayAdapter<ContactObject> {
     public View getView(final int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View resView = inflater.inflate(R.layout.friends_list_item, parent, false);
+        View resView = inflater.inflate(R.layout.contact_list_item, parent, false);
         final ContactObject thisFriend = friendList.get(position);
-        String relationStatus = thisFriend.getStatus();
+        String relationStatus = thisFriend.getRelationStatus();
+        String status = thisFriend.getStatus();
 
         TextView friendName, friendEMail, friendStatus;
         friendName = (TextView) resView.findViewById(R.id.friendName);
@@ -43,6 +44,8 @@ public class FriendListAdapter extends ArrayAdapter<ContactObject> {
         if (relationStatus.equals("FA")) {
             friendEMail.setText(thisFriend.getEmail());
         }
+
+        friendStatus.setText(status);
 
         return resView;
     }

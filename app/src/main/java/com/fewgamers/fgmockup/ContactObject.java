@@ -2,6 +2,7 @@ package com.fewgamers.fgmockup;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,7 +11,7 @@ import org.json.JSONObject;
  */
 
 public class ContactObject {
-    private String uuid, username, email, firstName, lastName, status;
+    private String uuid, username, email, firstName, lastName, status, relationStatus;
 
     public ContactObject() {
         this.uuid = "";
@@ -21,18 +22,36 @@ public class ContactObject {
         this.status = "";
     }
 
-    public void defineContact(String contactString) {
+    public void defineContact(String contactString, String relationStatus) {
+        this.relationStatus = relationStatus;
         try {
-            JSONObject thisContact = new JSONObject(contactString);
-            this.uuid = thisContact.getString("uuid");
-            this.username = thisContact.getString("nickname");
-            this.email = thisContact.getString("email");
-            this.firstName = thisContact.getString("firstname");
-            this.lastName = thisContact.getString("lastname");
-            this.status = thisContact.getString("status");
+            JSONObject thisContact = new JSONArray(contactString).getJSONObject(0);
+            try {
+                this.uuid = thisContact.getString("uuid");
+                this.username = thisContact.getString("nickname");
+                this.status = thisContact.getString("status");
+            } catch (JSONException exception) {
+                Log.e("Corrupt friend", "Friend data incomplete");
+            }
+            try {
+                this.email = thisContact.getString("email");
+            } catch (JSONException exception) {
+                Log.d("Email private", this.uuid + "'s email is private");
+                this.email = "";
+            }
+            try {
+                this.firstName = thisContact.getString("firstname");
+                this.lastName = thisContact.getString("lastname");
+            } catch (JSONException exception) {
+                Log.d("Name private", this.uuid + "'s name is private");
+                this.firstName = "";
+                this.lastName = "";
+            }
         } catch (JSONException exception) {
-            Log.e("Corrupt friend", "Friend data incomplete");
+            Log.e("User string error", "User string could not be formatted to JSONobject");
         }
+
+
     }
 
     public String getUsername() {
@@ -49,6 +68,10 @@ public class ContactObject {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getRelationStatus() {
+        return relationStatus;
     }
 
     public String getFirstName() {

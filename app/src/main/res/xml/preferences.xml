@@ -9,16 +9,16 @@
             android:title="@string/pref_user_privacy_subscreen_title">
 
             <CheckBoxPreference
+                android:defaultValue="true"
                 android:key="@string/pref_email_visible_key"
                 android:summary="@string/pref_email_visible_summary"
                 android:title="@string/pref_email_visible_title" />
-            <ListPreference
-                android:defaultValue="0"
-                android:entries="@array/pref_names_visible_entries"
-                android:entryValues="@array/pref_names_visible_entries"
-                android:key="@string/pref_names_visible_key"
-                android:summary="@string/pref_names_visible_summary"
-                android:title="@string/pref_names_visible_title" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="@string/pref_name_visible_key"
+                android:summary="@string/pref_name_visible_summary"
+                android:title="@string/pref_name_visible_title" />
+
         </PreferenceScreen>
 
         <PreferenceScreen

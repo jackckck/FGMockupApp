@@ -32,32 +32,4 @@ public class FragBase extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
-
-    // checkt of nightmode aan staat
-    public boolean nightModeCheck() {
-
-        SharedPreferences sp = getActivity().getSharedPreferences("NightModeActive", Context.MODE_PRIVATE);
-
-        boolean nightModeOn = sp.getBoolean("HAIL_SITHIS", false);
-
-        return nightModeOn;
-    }
-
-    // activeert night mode
-    public void changeBackGroundColor(RelativeLayout rl, boolean night) {
-        if (night) {
-            rl.setBackgroundColor(getResources().getColor(R.color.nightBackground));
-        } else {
-            rl.setBackgroundColor(getResources().getColor(R.color.background));
-        }
-    }
-
-    public JSONArray getJSONarrayFromString(String s) {
-        try {
-            JSONArray res = new JSONArray(s);
-            return res;
-        } catch (JSONException exception) {
-            throw new RuntimeException();
-        }
-    }
 }

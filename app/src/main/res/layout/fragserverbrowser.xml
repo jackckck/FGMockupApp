@@ -11,14 +11,12 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Loading data ..."
         android:visibility="invisible" />
 
     <EditText
         android:id="@+id/serverSearchBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignBottom="@id/serverFilterButton"
+        android:layout_height="wrap_content"
         android:layout_alignEnd="@id/sortingButton"
         android:layout_marginEnd="44dp"
         android:layout_marginStart="@dimen/fivedp"
@@ -28,7 +26,7 @@
         android:id="@+id/sortingButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/serverFilterButton"
+        android:layout_alignBottom="@id/serverSearchBar"
         android:layout_toLeftOf="@id/serverFilterButton"
         android:src="@drawable/ic_arrow_downward_black_24dp" />
 
@@ -36,6 +34,7 @@
         android:id="@+id/serverFilterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/serverSearchBar"
         android:layout_alignParentEnd="true"
         android:src="@drawable/ic_search_black_24dp" />
 
@@ -43,7 +42,7 @@
         android:id="@android:id/list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"></ListView>
+        android:layout_below="@id/serverSearchBar"></ListView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/serverBrowserRefreshFAB"
@@ -52,5 +51,5 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fifteendp"
-        android:src="@drawable/ic_refresh_white_24dp"/>
+        android:src="@drawable/ic_refresh_white_24dp" />
 </RelativeLayout>

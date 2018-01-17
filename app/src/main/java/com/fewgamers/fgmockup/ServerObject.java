@@ -13,17 +13,14 @@ public class ServerObject {
     private String game, serverName, playerCount, ip, userCreator;
     private Integer livePlayer, maxPlayer;
 
-    public void defineServer(JSONObject jsonObject) {
-        try {
-            this.game = jsonObject.getString("game");
-            this.serverName = jsonObject.getString("name");
-            //this.playerCount = jsonObject.getString("playercount");
-            this.playerCount = "0/1";
-            this.ip = jsonObject.getString("ip");
-            this.userCreator = jsonObject.getString("creator");
-        } catch (JSONException j) {
-            Log.e("Corrupt server", "Server data incomplete");
-        }
+    public void defineServer(JSONObject jsonObject) throws JSONException {
+        this.game = jsonObject.getString("game");
+        this.serverName = jsonObject.getString("name");
+        //this.playerCount = jsonObject.getString("playercount");
+        this.playerCount = "0/1";
+        this.ip = jsonObject.getString("ip");
+        this.userCreator = jsonObject.getString("creator");
+
         String[] playerCountStrings = playerCount.split("/");
         livePlayer = Integer.parseInt(playerCountStrings[0]);
         maxPlayer = Integer.parseInt(playerCountStrings[1]);

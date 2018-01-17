@@ -19,42 +19,51 @@ import java.net.URL;
  */
 
 public class FGAsyncTask extends AsyncTask<String, Void, String> {
-    private String response = "";
-
     @Override
     protected String doInBackground(String... strings) {
+        String response = "";
+        boolean errorOccured = false;
         try {
             URL url = new URL(strings[0]);
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
             connection.setRequestMethod(strings[2]);
-            connection.setDoOutput(true);
-            DataOutputStream streamOut = new DataOutputStream(connection.getOutputStream());
+            if (!strings[2].equals("GET")) {
+                connection.setDoOutput(true);
+                DataOutputStream streamOut = new DataOutputStream(connection.getOutputStream());
 
-            streamOut.writeBytes(strings[1]);
-            streamOut.flush();
-            streamOut.close();
-
+                streamOut.writeBytes(strings[1]);
+                streamOut.flush();
+                streamOut.close();
+            }
             int responseCode = connection.getResponseCode();
-
             Log.d("Response Code", responseCode + "");
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            errorOccured = (responseCode >= 400);
+
+            BufferedReader reader;
+            if (errorOccured) {
+                reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+            } else {
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            }
             String line = "";
             StringBuilder responseOutput = new StringBuilder();
 
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 responseOutput.append(line);
             }
 
             response = responseOutput.toString();
             Log.d("Response Output", response);
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            connection.disconnect();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (errorOccured) {
+            return "error";
         }
         return response;
     }

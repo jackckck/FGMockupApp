@@ -1,6 +1,8 @@
 package com.fewgamers.fgmockup;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -31,7 +33,7 @@ public class PrefChangeUserInfo extends DialogPreference {
                 oldValue = mainActivity.email;
                 break;
             case R.string.pref_user_change_username_title:
-                whichValue = "username";
+                whichValue = "nickname";
                 whichValueRead = "username";
                 oldValue = mainActivity.username;
                 break;
@@ -65,30 +67,54 @@ public class PrefChangeUserInfo extends DialogPreference {
             newValue = newValueEdit.getText().toString();
             Log.d("new value", newValue);
 
-            JSONObject userData = new JSONObject();
-            JSONObject finalChangeQuery = new JSONObject();
-            String encryptedUserDataString;
-            FGEncrypt fgEncrypt = new FGEncrypt();
-
-            try {
-                userData.put("uuid", mainActivity.uuid);
-                userData.put(whichValue, newValue);
-            } catch (JSONException exception) {
-                exception.printStackTrace();
+            if (newValue.length() == 0) {
+                return;
             }
 
-            encryptedUserDataString = fgEncrypt.encrypt(userData.toString());
+            AlertDialog.Builder confirmation = new AlertDialog.Builder(getContext());
+            confirmation.setMessage("Do you want " + newValue + " as your new " + whichValueRead + "?");
+            confirmation.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    changeUserValue(newValue);
+                }
+            });
+            confirmation.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            confirmation.show();
+        }
+    }
 
-            try {
-                finalChangeQuery.put("userdata", encryptedUserDataString);
-            } catch (JSONException exception) {
-                exception.printStackTrace();
-            }
-            Log.d("userdata", encryptedUserDataString);
-            Log.d("let op!", finalChangeQuery.toString());
-            if (newValue != null && !newValue.equals("")) {
-                new ChangeUserInfoAsyncTask().execute("https://fewgamers.com/api/user/", finalChangeQuery.toString(), "PUT");
-            }
+    private void changeUserValue(String newValue) {
+        JSONObject userData = new JSONObject();
+        JSONObject finalChangeQuery = new JSONObject();
+        String encryptedUserDataString;
+        FGEncrypt fgEncrypt = new FGEncrypt();
+
+        try {
+            userData.put("uuid", mainActivity.uuid);
+            userData.put(whichValue, newValue);
+        } catch (JSONException exception) {
+            exception.printStackTrace();
+        }
+
+        Log.d("userdata", userData.toString());
+
+        encryptedUserDataString = fgEncrypt.encrypt(userData.toString());
+
+        try {
+            finalChangeQuery.put("key", mainActivity.master);
+            finalChangeQuery.put("userdata", encryptedUserDataString);
+        } catch (JSONException exception) {
+            exception.printStackTrace();
+        }
+        Log.d("encrypted userdata", encryptedUserDataString);
+        Log.d("let op!", finalChangeQuery.toString());
+        if (newValue != null && !newValue.equals("")) {
+            new ChangeUserInfoAsyncTask().execute("https://fewgamers.com/api/user/", finalChangeQuery.toString(), "PATCH");
         }
     }
 

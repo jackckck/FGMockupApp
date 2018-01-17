@@ -33,7 +33,6 @@
         android:layout_below="@id/friendName"
         android:layout_marginTop="@dimen/fivedp"
         android:layout_toEndOf="@id/friendProfilePic"
-        android:text="j.d.dejong@students.uu.nl"
         android:textSize="@dimen/server_font_size" />
 
     <TextView
@@ -42,6 +41,5 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/fourdp"
-        android:layout_marginTop="@dimen/fourdp"
-        android:text="Offline" />
+        android:layout_marginTop="@dimen/fourdp" />
 </RelativeLayout>

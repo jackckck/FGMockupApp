@@ -2,18 +2,24 @@ package com.fewgamers.fgmockup;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -32,7 +38,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -41,19 +47,17 @@ import java.util.Map;
 public class FragContacts extends ListFragBase {
     ArrayList<ContactObject> currentContactsList, friendsList, pendingList, blockedList;
 
-    String[] friendLongClickOptionsList = new String[3];
-    String[] pendingLongClickOptionsList = new String[3];
-    String[] blockedLongClickOptionsList = new String[1];
+    String[] allRegisteredUsernames, allRegisteredUUIDs;
 
-    FriendListAdapter friendAdapter;
+    ContactsListAdapter friendAdapter;
 
-    String thisUser = "082894cf-2c7c-4b30-87ff-806792804dfe";
+    String thisUser = "dfaeb3cdd79648a0a7c6442cd1764dfa";
 
     MainActivity mainActivity;
 
-    Map<String, ArrayList<ContactObject>> contactsListMap;
-
     TabLayout.OnTabSelectedListener conctactsTabsSelect;
+
+    FloatingActionButton contactsFAB;
 
     private boolean notReady = true;
 
@@ -61,6 +65,8 @@ public class FragContacts extends ListFragBase {
 
     int contactsCount = 0;
     int addedCount = 0;
+
+    String relations = "";
 
     @Nullable
     @Override
@@ -71,68 +77,26 @@ public class FragContacts extends ListFragBase {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         contactsQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+
+        mainActivity = (MainActivity) getActivity();
+        getAllRegisteredUsers();
+
         currentContactsList = new ArrayList<>();
         friendsList = new ArrayList<>();
         pendingList = new ArrayList<>();
         blockedList = new ArrayList<>();
 
-        mainActivity = (MainActivity) getActivity();
         // laden begint
         mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
 
         mainActivity.friendsTabs.setVisibility(View.VISIBLE);
 
-        friendLongClickOptionsList[1] = "Chat history";
-        friendLongClickOptionsList[2] = "Remove friend";
-        pendingLongClickOptionsList[1] = "Accept";
-
         if (mainActivity.hasFriendListStored) {
             makeContactsLists(mainActivity.completeContactsListString);
         } else {
-            new contactsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + thisUser + mainActivity.urlKey,
-                    "https://fewgamers.com/api/userrelation/?user2=" + thisUser + mainActivity.urlKey);
+            new contactsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + "&key=" + mainActivity.master, null, "GET");
+            new contactsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user2=" + mainActivity.uuid + "&key=" + mainActivity.master, null, "GET");
         }
-
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder friendClickOptionsBuilder = new AlertDialog.Builder(getActivity());
-
-                String[] optionsList;
-                String openProfileOption = currentContactsList.get(position).getUsername() + "'s profile";
-                friendLongClickOptionsList[0] = openProfileOption;
-                pendingLongClickOptionsList[2] = openProfileOption;
-                String thirdOption = "";
-                switch (currentContactsList.get(position).getStatus()) {
-                    case "FA":
-                        thirdOption = "Remove friend";
-                        break;
-                    case "FP":
-                        thirdOption = "Accept friend request";
-                        break;
-                    case "B":
-                        thirdOption = "Unblock";
-                        break;
-                }
-                friendLongClickOptionsList[2] = thirdOption;
-
-                friendClickOptionsBuilder.setItems(friendLongClickOptionsList, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0) {
-                            openFriendProfile(position);
-                        } else if (which == 1) {
-                            openChatActivity();
-                        }
-                    }
-                });
-
-                AlertDialog friendClickOptionsDialog = friendClickOptionsBuilder.create();
-                friendClickOptionsDialog.show();
-
-                return true;
-            }
-        });
 
         conctactsTabsSelect = new TabLayout.OnTabSelectedListener() {
             @Override
@@ -140,6 +104,7 @@ public class FragContacts extends ListFragBase {
                 if (notReady) {
                     return;
                 }
+                int fabImageResource = R.drawable.ic_add_friend;
                 currentContactsList.clear();
                 switch (tab.getPosition()) {
                     case 0:
@@ -153,9 +118,12 @@ public class FragContacts extends ListFragBase {
                     case 2:
                         currentContactsList.addAll(blockedList);
                         mainActivity.friendsTabSelected = 2;
+                        fabImageResource = R.drawable.ic_block_person;
                         break;
                 }
                 friendAdapter.notifyDataSetChanged();
+
+                contactsFAB.setImageResource(fabImageResource);
             }
 
             @Override
@@ -168,12 +136,34 @@ public class FragContacts extends ListFragBase {
         };
         mainActivity.friendsTabs.addOnTabSelectedListener(conctactsTabsSelect);
 
+        contactsFAB = getActivity().findViewById(R.id.contactsFAB);
+        switch (mainActivity.friendsTabSelected) {
+            case 0:
+                contactsFAB.setVisibility(View.VISIBLE);
+                contactsFAB.setImageResource(R.drawable.ic_add_friend);
+                break;
+            case 1:
+                contactsFAB.setImageResource(R.drawable.ic_add_friend);
+                break;
+            case 2:
+                contactsFAB.setVisibility(View.VISIBLE);
+                contactsFAB.setImageResource(R.drawable.ic_block_person);
+                break;
+        }
+
+        contactsFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showUserrelationDialog(mainActivity.friendsTabSelected);
+            }
+        });
+
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void openFriendProfile(int position) {
+    private void openProfile(String uuid) {
         FragUserInfo fragment = new FragUserInfo();
-        fragment.setFriendUUID(currentContactsList.get(position).getUsername());
+        fragment.setFriendUUID(uuid);
 
         if (fragment != null) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -183,25 +173,91 @@ public class FragContacts extends ListFragBase {
         }
     }
 
+    private void removeFriend(String uuid) {
+
+    }
+
+    private void acceptFriend(String uuid) {
+        addUserRelation("FA", uuid);
+    }
+
+    private void unblockUser(String uuid) {
+
+    }
+
     private void openChatActivity() {
         Intent moveToChatIntent = new Intent(getActivity(), ChatActivity.class);
         startActivity(moveToChatIntent);
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
+    public void onListItemClick(ListView l, View v, final int position, long id) {
         super.onListItemClick(l, v, position, id);
-        openChatActivity();
+
+        AlertDialog.Builder contactClickOptionsBuilder = new AlertDialog.Builder(getActivity());
+
+        String[] optionsList;
+        String openProfileOption = currentContactsList.get(position).getUsername() + "'s profile";
+        final String uuid = currentContactsList.get(position).getUUID();
+        switch (currentContactsList.get(position).getStatus()) {
+            case "FA":
+                optionsList = new String[2];
+                optionsList[0] = openProfileOption;
+                optionsList[1] = "Remove friend";
+                contactClickOptionsBuilder.setItems(optionsList, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            openProfile(uuid);
+                        } else if (which == 1) {
+                            removeFriend(uuid);
+                        }
+                    }
+                });
+                break;
+            case "FP":
+                optionsList = new String[2];
+                optionsList[0] = openProfileOption;
+                optionsList[1] = "Accept friend request";
+                contactClickOptionsBuilder.setItems(optionsList, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            openProfile(uuid);
+                        } else if (which == 1) {
+                            acceptFriend(uuid);
+                        }
+                    }
+                });
+                break;
+            case "B":
+                optionsList = new String[1];
+                optionsList[0] = "Unblock";
+                contactClickOptionsBuilder.setItems(optionsList, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            unblockUser(uuid);
+                        }
+                    }
+                });
+                break;
+            default:
+                optionsList = new String[1];
+                break;
+        }
+
+        AlertDialog friendClickOptionsDialog = contactClickOptionsBuilder.create();
+        friendClickOptionsDialog.show();
     }
 
 
     private void makeContactsLists(String jsonString) {
         JSONArray jsonArray;
-
         try {
             jsonArray = new JSONArray(jsonString);
         } catch (JSONException exception) {
-            Log.e("Server list not found", "Something went wrong when loading server data");
+            Log.e("Contacts list not found", "Something went wrong when loading contacts data");
             return;
         }
 
@@ -218,7 +274,7 @@ public class FragContacts extends ListFragBase {
         }
         contactsCount = allRelations.size();
         for (String[] relation : allRelations) {
-            addContact(relation[1], selectContactsList(relation[0]));
+            addContact(relation[1], relation[0], selectContactsList(relation[0]));
         }
     }
 
@@ -234,13 +290,13 @@ public class FragContacts extends ListFragBase {
             relationStatus = userRelation.getString("status");
         } catch (JSONException exception) {
         }
-        if (thisUser.equals(user1)) {
+        if (mainActivity.uuid.equals(user1)) {
             if (relationStatus.equals("FP")) {
                 relationStatus = "null";
             } else {
                 contactUUID = user2;
             }
-        } else if (thisUser.equals(user2)) {
+        } else if (mainActivity.uuid.equals(user2)) {
             if (relationStatus.equals("B")) {
                 relationStatus = "null";
             } else {
@@ -268,15 +324,16 @@ public class FragContacts extends ListFragBase {
     }
 
 
-    private void addContact(String contactUUID, final ArrayList<ContactObject> selectedList) {
+    private void addContact(String contactUUID, final String relationStatus, final ArrayList<ContactObject> selectedList) {
         if (selectedList == null) {
             return;
         }
         contactsQueue.add(new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?uuid=" + contactUUID + mainActivity.urlKey, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                Log.d("volley response", response);
                 ContactObject contactObject = new ContactObject();
-                contactObject.defineContact(response);
+                contactObject.defineContact(response, relationStatus);
                 selectedList.add(contactObject);
 
                 checkIfDone();
@@ -296,62 +353,22 @@ public class FragContacts extends ListFragBase {
         }
     }
 
-    private class contactsAsyncTask extends AsyncTask<String, Void, String> {
-        String response = "";
-
-        @Override
-        protected String doInBackground(String... strings) {
-            try {
-                URL urlOne = new URL(strings[0]);
-                URL urlTwo = new URL(strings[1]);
-
-                HttpURLConnection connectionOne = (HttpURLConnection) urlOne.openConnection();
-                HttpURLConnection connectionTwo = (HttpURLConnection) urlTwo.openConnection();
-
-                connectionOne.setRequestMethod("GET");
-                connectionTwo.setRequestMethod("GET");
-
-                int responseCodeOne = connectionOne.getResponseCode();
-                int responseCodeTwo = connectionTwo.getResponseCode();
-
-                Log.d("Response Code 1", responseCodeOne + "");
-                Log.d("Response Code 2", responseCodeTwo + "");
-
-                BufferedReader readerOne = new BufferedReader(new InputStreamReader(connectionOne.getInputStream()));
-                BufferedReader readerTwo = new BufferedReader(new InputStreamReader(connectionTwo.getInputStream()));
-                String line = "";
-                StringBuilder responseOutput = new StringBuilder();
-
-                while ((line = readerOne.readLine()) != null) {
-                    responseOutput.append(line);
-                }
-                while ((line = readerTwo.readLine()) != null) {
-                    responseOutput.append(line);
-                }
-
-                response = responseOutput.toString();
-
-                connectionOne.disconnect();
-                connectionTwo.disconnect();
-
-                Log.d("Response Output", response);
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return response;
-        }
-
+    private class contactsAsyncTask extends FGAsyncTask {
         @Override
         protected void onPostExecute(String response) {
-            Log.d("formattedstring", response);
+            if (response.equals("error")) {
+                mainActivity.mainProgressBar.setVisibility(View.GONE);
+                Log.e("Userrelation error", "Something went wrong when requesting usserelations at https://fewgamers.com/api/userrelation/");
+                TextView failedToLoadText = getActivity().findViewById(R.id.contactsFailedToLoad);
+                failedToLoadText.setText("Failed to load contacts");
+            } else {
+                makeContactsLists(response);
 
-            makeContactsLists(response);
+                mainActivity.completeContactsListString = response;
+                mainActivity.hasFriendListStored = true;
+            }
 
-            mainActivity.completeContactsListString = response;
-            mainActivity.hasFriendListStored = true;
+
         }
     }
 
@@ -368,7 +385,7 @@ public class FragContacts extends ListFragBase {
                 currentContactsList.addAll(blockedList);
                 break;
         }
-        friendAdapter = new FriendListAdapter(getActivity(), currentContactsList);
+        friendAdapter = new ContactsListAdapter(getActivity(), currentContactsList);
         setListAdapter(friendAdapter);
 
         // laden is voorbij
@@ -377,7 +394,111 @@ public class FragContacts extends ListFragBase {
         notReady = false;
     }
 
-    public void removeTabsSelector() {
-        mainActivity.friendsTabs.removeOnTabSelectedListener(conctactsTabsSelect);
+    private void showUserrelationDialog(final int friendsTabSelected) {
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View dialogView = inflater.inflate(R.layout.add_userrelation_alertdialog, null);
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        dialogBuilder.setView(dialogView);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, allRegisteredUsernames);
+
+        final AutoCompleteTextView autoComplete = (AutoCompleteTextView) dialogView.findViewById(R.id.add_userrelation_autocomplete);
+        autoComplete.setAdapter(adapter);
+        autoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedUser = (String) parent.getItemAtPosition(position);
+                autoComplete.setText(selectedUser);
+            }
+        });
+
+        final String dialogTitle, positiveText, relationStatus;
+        if (friendsTabSelected == 2) {
+            dialogTitle = "Block user";
+            positiveText = "Block";
+            relationStatus = "B";
+        } else {
+            dialogTitle = "Add friend";
+            positiveText = "Add";
+            relationStatus = "FP";
+        }
+        dialogBuilder.setTitle(dialogTitle);
+        dialogBuilder.setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                int index = Arrays.asList(allRegisteredUsernames).indexOf(autoComplete.getText().toString());
+                try {
+                    addUserRelation(relationStatus, allRegisteredUUIDs[index]);
+                } catch (ArrayIndexOutOfBoundsException exception) {
+                    Toast.makeText(getActivity(), "User" + autoComplete.getText().toString() + " could not be found.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        dialogBuilder.show();
+    }
+
+    private void addUserRelation(String relationStatus, String uuid) {
+        Toast.makeText(getActivity(), uuid, Toast.LENGTH_SHORT).show();
+        JSONObject userdata = new JSONObject();
+        JSONObject finalQuery = new JSONObject();
+        String encryptedUserdata;
+        FGEncrypt fgEncrypt = new FGEncrypt();
+        try {
+            userdata.put("user1", mainActivity.uuid);
+            userdata.put("user2", uuid);
+            userdata.put("status", relationStatus);
+        } catch (JSONException exception) {
+            Log.e("Userdata JSONE error", "Could not construct userdata JSONObject");
+        }
+        Log.d("userdata unencrypted", userdata.toString());
+        encryptedUserdata = fgEncrypt.encrypt(userdata.toString());
+        try {
+            finalQuery.put("key", mainActivity.master);
+            finalQuery.put("userdata", encryptedUserdata);
+        } catch (JSONException exception) {
+            Log.e("Add userrelation error", "Could not construct add userrelation JSONObject");
+        }
+
+        Log.d("finalQuery", finalQuery.toString());
+        new FGAsyncTask().execute("https://fewgamers.com/api/userrelation/", finalQuery.toString(), "POST");
+    }
+
+
+    private void getAllRegisteredUsers() {
+        contactsQueue.add(new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?key=" + mainActivity.master, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("volley response", response);
+                ArrayList<String> eligibleUsernames = new ArrayList<>();
+                ArrayList<String> eligibleUUIDs = new ArrayList<>();
+                int eligibleCount = 0;
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject user = jsonArray.getJSONObject(i);
+                        if (user.getString("status").equals("A")) {
+                            eligibleUsernames.add(user.getString("nickname"));
+                            eligibleUUIDs.add(user.getString("uuid"));
+                            eligibleCount++;
+                        }
+                    }
+                    allRegisteredUsernames = new String[eligibleCount];
+                    allRegisteredUUIDs = new String[eligibleCount];
+                    for (int j = 0; j < eligibleCount; j++) {
+                        allRegisteredUsernames[j] = eligibleUsernames.get(j);
+                        allRegisteredUUIDs[j] = eligibleUUIDs.get(j);
+                    }
+                } catch (JSONException exception) {
+                    Log.e("/api/user/ error", "Could not extract JSONArray of all registered users");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        }));
     }
 }

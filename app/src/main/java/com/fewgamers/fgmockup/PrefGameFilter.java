@@ -4,12 +4,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.support.v7.widget.AppCompatImageButton;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -18,10 +14,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * Created by Administrator on 1/12/2018.
@@ -29,67 +24,68 @@ import java.util.Arrays;
 
 public class PrefGameFilter extends DialogPreference {
     private String[] allGames, selectedGames;
-    private String selectedGameString;
+    private String allGamesString;
+    private StringBuilder selectedGameBuilder;
     private LinearLayout selectedGamesLayout, currentRow;
-    private MultiAutoCompleteTextView filterEdit;
+    private MultiAutoCompleteTextView filterAutoComplete;
     private ArrayAdapter<String> filterAdapter;
     private ImageButton clearButton;
     private int selectedCount = 0;
 
-    public PrefGameFilter(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    private Context context;
+
+    public PrefGameFilter(Context c, AttributeSet attrs) {
+        super(c, attrs);
+
+        new GameFilterAsyncTask().execute("https://fewgamers.com/api/game/", null, "GET");
 
         setDialogLayoutResource(R.layout.pref_game_filter);
         setPositiveButtonText("Apply");
-
-        allGames = getAllGames();
-    }
-
-    private String[] getAllGames() {
-        return new String[]{
-                "Boata", "Cod2", "Day of Defeat", "StarCraft:BW", "Red Orchestra"
-        };
     }
 
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        selectedCount = 0;
-        selectedGameString = "";
+        context = getContext();
 
-        filterEdit = (MultiAutoCompleteTextView) view.findViewById(R.id.filtered_games_edit_add);
-        filterAdapter = new ArrayAdapter<>(view.getContext(),
+        selectedCount = 0;
+        selectedGameBuilder = new StringBuilder("");
+
+        filterAutoComplete = (MultiAutoCompleteTextView) view.findViewById(R.id.filtered_games_edit_add);
+        filterAdapter = new ArrayAdapter<>(context,
                 android.R.layout.simple_dropdown_item_1line, allGames);
-        filterEdit.setAdapter(filterAdapter);
-        filterEdit.setThreshold(1);
-        filterEdit.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
-        filterEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        filterAutoComplete.setAdapter(filterAdapter);
+        filterAutoComplete.setThreshold(1);
+        filterAutoComplete.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        filterAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                filterEdit.setText("");
+                filterAutoComplete.setText("");
                 String selectedGame = (String) parent.getItemAtPosition(position);
-
                 addGameText(selectedGame);
+                filterAdapter.remove(selectedGame);
             }
         });
         selectedGamesLayout = (LinearLayout) view.findViewById(R.id.filtered_games_texts_linear_layout);
 
-        clearButton = new AppCompatImageButton(getContext());
+        clearButton = new AppCompatImageButton(context);
         LinearLayout.LayoutParams buttomParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         clearButton.setImageResource(R.drawable.ic_game_filter_clear_button);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedGameString = "";
+                selectedGameBuilder = new StringBuilder("");
                 selectedGamesLayout.removeAllViews();
                 selectedCount = 0;
             }
         });
 
-        for (String game : selectedGames) {
-            addGameText(game);
+        if (selectedGames != null) {
+            for (String game : selectedGames) {
+                addGameText(game);
+            }
         }
     }
 
@@ -97,14 +93,16 @@ public class PrefGameFilter extends DialogPreference {
         if (selectedGame.length() == 0) {
             return;
         }
-        selectedGameString += ",," + selectedGame;
+        selectedGameBuilder.append(",,");
+        selectedGameBuilder.append(selectedGame);
 
         try {
             currentRow.removeView(clearButton);
         } catch (NullPointerException e) {
+            // de eerste iteratie is er geen clearButton toegevoegd
         }
         if (selectedCount % 3 == 0) {
-            currentRow = new LinearLayout(getContext());
+            currentRow = new LinearLayout(context);
             selectedGamesLayout.addView(currentRow);
         }
         TextView gameText = getGameText(selectedGame);
@@ -116,10 +114,10 @@ public class PrefGameFilter extends DialogPreference {
     }
 
     private TextView getGameText(String selectedGame) {
-        TextView gameText = new TextView(getContext());
+        TextView gameText = new TextView(context);
         gameText.setText(selectedGame);
 
-        gameText.setBackground(getContext().getResources().getDrawable(R.drawable.chat_date_rounded_textview));
+        gameText.setBackground(context.getResources().getDrawable(R.drawable.chat_date_rounded_textview));
         gameText.setPadding(10, 10, 10, 10);
 
         return gameText;
@@ -128,9 +126,10 @@ public class PrefGameFilter extends DialogPreference {
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
-            String persist = "";
-            if (selectedGameString.length() > 0) {
-                persist = selectedGameString.substring(2);
+            String persist = selectedGameBuilder.toString();
+            if (persist.length() > 0) {
+                persist = persist.substring(2);
+            } else {
             }
             persistString(persist);
             selectedGames = persist.split(",,");
@@ -154,5 +153,20 @@ public class PrefGameFilter extends DialogPreference {
     @Override
     protected String onGetDefaultValue(TypedArray a, int index) {
         return a.getString(index);
+    }
+
+    private class GameFilterAsyncTask extends FGAsyncTask {
+        @Override
+        protected void onPostExecute(String response) {
+            try {
+                JSONArray jsonArray = new JSONArray(response);
+                allGames = new String[jsonArray.length()];
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    allGames[i] = jsonArray.getJSONObject(i).getString("name");
+                }
+            } catch (JSONException exception) {
+                Log.e("JSONarray error", "Couldn't format the response string to JSON array");
+            }
+        }
     }
 }

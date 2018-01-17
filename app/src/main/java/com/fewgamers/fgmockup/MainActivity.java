@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity
     public String completeServerListString;
     public String completeContactsListString;
     public String serverSearchFilter;
+    public String master;
     public boolean hasServerListStored, hasFriendListStored;
 
     public String uuid, username, email, firstName, lastName, key, activactionCode, urlKey;
@@ -82,12 +83,21 @@ public class MainActivity extends AppCompatActivity
 
     private void getLoginData() {
         mainSharedPreferences = getSharedPreferences("LoginData", Context.MODE_PRIVATE);
+
         this.uuid = mainSharedPreferences.getString("uuid", null);
+        // WRONG !!! //
+        //this.uuid = "8b2d8776b37b5b6394b6d614e9a0f667";
+        // WRONG !!! //
         this.username = mainSharedPreferences.getString("nickname", null);
         this.email = mainSharedPreferences.getString("email", null);
         this.firstName = mainSharedPreferences.getString("firstName", "None");
         this.lastName = mainSharedPreferences.getString("lastName", "None");
+
         this.key = mainSharedPreferences.getString("key", null);
+        // WRONG !!! //
+        //this.key = "6dd37ecf-383e-45a5-85c1-83f823827a21";
+        // WRONG !!! //
+        this.master = "d54e4e7f04284ffb8662be06337cd09f";
         this.activactionCode = mainSharedPreferences.getString("activationCode", null);
 
         this.urlKey = "&key=" + this.key;
@@ -145,7 +155,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = new FragServerBrowser();
                 break;
             case R.id.nav_settings:
-                fragment = new FragSettings();
+                fragment = new FragPreferences();
                 break;
         }
 
@@ -174,7 +184,7 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
 
         if (id == R.id.action_settings) {
-            fragment = new FragSettings();
+            fragment = new FragPreferences();
             previousFragId.add(0, R.id.nav_settings);
         } else if (id == R.id.action_logOut) {
             logOut();

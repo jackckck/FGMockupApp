@@ -80,6 +80,10 @@ public class FragUser extends ListFragBase {
         // requestMyServers(requestQueue, mainActivity.uuid);
         requestMyServers(requestQueue, uuid);
 
+        if (mainActivity.friendsTabSelected != 0) {
+            toggleDisplaysVisibility(false);
+        }
+
         userTabsSelect = new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {

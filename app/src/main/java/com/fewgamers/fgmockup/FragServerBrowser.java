@@ -72,10 +72,11 @@ public class FragServerBrowser extends ListFragBase {
     String serverListString;
 
     Integer[] playerLimits;
+    String[] allowedGames;
 
     Boolean hideEmpty, hideFull;
 
-    boolean notReady;
+    boolean notReady, gamesFilterActive;
 
     @Nullable
     @Override
@@ -275,6 +276,7 @@ public class FragServerBrowser extends ListFragBase {
                 mainActivity.completeServerListString = response;
                 mainActivity.hasServerListStored = true;
 
+                Log.d("Server list", response);
                 extractServerListFromJSONString(response);
             }
         }, new Response.ErrorListener() {
@@ -332,8 +334,9 @@ public class FragServerBrowser extends ListFragBase {
             Integer playerCount, playerCap;
             playerCount = serverObject.getLivePlayer();
             playerCap = serverObject.getMaxPlayer();
+            String game = serverObject.getGame();
 
-            if (passesFilter(playerCount, playerCap)) {
+            if (passesFilter(playerCount, playerCap, game)) {
                 Integer j = successCounter - 1;
 
                 while (j > -1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
@@ -364,7 +367,7 @@ public class FragServerBrowser extends ListFragBase {
 
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
         strings0 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercount_key), "null-null").split("-");
-        strings1 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null_null").split("-");
+        strings1 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null-null").split("-");
 
         if (strings0[0].equals("null")) {
             playerLimits[0] = -1;
@@ -389,9 +392,12 @@ public class FragServerBrowser extends ListFragBase {
 
         hideEmpty = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_empty_key), false);
         hideFull = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_full_key), false);
+
+        allowedGames = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_game_filter_key), "").split(",,");
+        gamesFilterActive = (allowedGames.length > 0);
     }
 
-    private boolean passesFilter(Integer playerCount, Integer playerCap) {
+    private boolean passesFilter(Integer playerCount, Integer playerCap, String game) {
         if (hideEmpty && playerCount.equals(0)) {
             return false;
         }
@@ -401,6 +407,7 @@ public class FragServerBrowser extends ListFragBase {
         if (playerCount < playerLimits[0] || playerLimits[1] < playerCount || playerCap < playerLimits[2] || playerLimits[3] < playerCap) {
             return false;
         }
+
         return true;
     }
 }

@@ -115,7 +115,7 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
 
     private void checkLogin() {
         // later weghalen !!!
-        allowAccess();
+        //allowAccess();
         /// later weghalen!!!
 
         email = emailEdit.getText().toString();
