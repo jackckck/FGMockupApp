@@ -8,6 +8,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"></ListView>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/addServerFAB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/tendp"
+        android:src="@drawable/ic_plus_sign" />
+
     <TextView
         android:id="@+id/friendsInfoUsername"
         android:layout_width="wrap_content"

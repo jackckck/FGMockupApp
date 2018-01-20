@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="@dimen/tendp">
+
+    <TextView
+        android:id="@+id/confirmAddServerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:layout_marginTop="@dimen/tendp" />
+
+    <TextView
+        android:id="@+id/confirmAddServerGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp" />
+
+    <TextView
+        android:id="@+id/confirmAddServerIP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp" />
+
+    <TextView
+        android:id="@+id/confirmAddServerPlayerCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp" />
+
+    <EditText
+        android:id="@+id/confirmAddServerAdditionalDataEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:hint="Additional information" />
+</LinearLayout>

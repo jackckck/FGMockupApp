@@ -23,6 +23,7 @@ public class ContactObject {
     }
 
     public void defineContact(String contactString, String relationStatus) {
+        Log.d("contactString", contactString);
         this.relationStatus = relationStatus;
         try {
             JSONObject thisContact = new JSONArray(contactString).getJSONObject(0);

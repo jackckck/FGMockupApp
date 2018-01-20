@@ -23,7 +23,7 @@ import org.json.JSONException;
  */
 
 public class PrefGameFilter extends DialogPreference {
-    private String[] allGames, selectedGames;
+    private String[] allGames, allGamesUUIDs, selectedGames;
     private String allGamesString;
     private StringBuilder selectedGameBuilder;
     private LinearLayout selectedGamesLayout, currentRow;
@@ -32,12 +32,16 @@ public class PrefGameFilter extends DialogPreference {
     private ImageButton clearButton;
     private int selectedCount = 0;
 
+    private MainActivity mainActivity;
+
     private Context context;
 
     public PrefGameFilter(Context c, AttributeSet attrs) {
         super(c, attrs);
 
-        new GameFilterAsyncTask().execute("https://fewgamers.com/api/game/", null, "GET");
+        mainActivity = (MainActivity) c;
+        allGames = mainActivity.getAllGames();
+        allGamesUUIDs = mainActivity.getAllGamesUUIDs();
 
         setDialogLayoutResource(R.layout.pref_game_filter);
         setPositiveButtonText("Apply");
@@ -79,6 +83,8 @@ public class PrefGameFilter extends DialogPreference {
                 selectedGameBuilder = new StringBuilder("");
                 selectedGamesLayout.removeAllViews();
                 selectedCount = 0;
+                filterAdapter.clear();
+                filterAdapter.addAll(allGames);
             }
         });
 
@@ -153,20 +159,5 @@ public class PrefGameFilter extends DialogPreference {
     @Override
     protected String onGetDefaultValue(TypedArray a, int index) {
         return a.getString(index);
-    }
-
-    private class GameFilterAsyncTask extends FGAsyncTask {
-        @Override
-        protected void onPostExecute(String response) {
-            try {
-                JSONArray jsonArray = new JSONArray(response);
-                allGames = new String[jsonArray.length()];
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    allGames[i] = jsonArray.getJSONObject(i).getString("name");
-                }
-            } catch (JSONException exception) {
-                Log.e("JSONarray error", "Couldn't format the response string to JSON array");
-            }
-        }
     }
 }

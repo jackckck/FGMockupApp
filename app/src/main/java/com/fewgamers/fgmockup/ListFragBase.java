@@ -14,6 +14,8 @@ import com.android.volley.toolbox.StringRequest;
  */
 
 public class ListFragBase extends ListFragment {
+    MainActivity mainActivity;
+
     public String formatStringToJSONArray(String string) {
         String res = string;
         for (int i = res.length() - 1; i > 1; i--) {

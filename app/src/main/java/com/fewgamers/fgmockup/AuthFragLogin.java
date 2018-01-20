@@ -1,5 +1,7 @@
 package com.fewgamers.fgmockup;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -114,10 +116,6 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
     }
 
     private void checkLogin() {
-        // later weghalen !!!
-        //allowAccess();
-        /// later weghalen!!!
-
         email = emailEdit.getText().toString();
         pass = passEdit.getText().toString();
 

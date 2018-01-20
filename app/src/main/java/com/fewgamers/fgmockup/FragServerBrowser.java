@@ -59,8 +59,6 @@ public class FragServerBrowser extends ListFragBase {
     ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
     FloatingActionButton fab;
 
-    MainActivity mainActivity;
-
     ServerListAdapter serverAdapter;
 
     EditText searchBar;

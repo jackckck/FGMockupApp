@@ -1,20 +1,27 @@
 package com.fewgamers.fgmockup;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.ListFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -24,8 +31,10 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -38,15 +47,15 @@ public class FragUser extends ListFragBase {
 
     String uuid = "2532ef98f6034792baf22471073683f6";
 
-    MainActivity mainActivity;
-
     ServerListAdapter userAdapter;
 
     TabLayout.OnTabSelectedListener userTabsSelect;
 
     TextView usernameText, emailText, firstNameText, lastNameText, usernameDisplay, emailDisplay, firstNameDisplay, lastNameDisplay;
 
-    private boolean notReady;
+    private boolean notReady = true;
+
+    FloatingActionButton userFAB;
 
     @Nullable
     @Override
@@ -55,12 +64,13 @@ public class FragUser extends ListFragBase {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivity = (MainActivity) getActivity();
         // laden begint
         mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
 
+        // widgets ophalen
         usernameDisplay = mainActivity.findViewById(R.id.friendsInfoUsernameDisplay);
         emailDisplay = mainActivity.findViewById(R.id.friendsInfoEMailDisplay);
         firstNameDisplay = mainActivity.findViewById(R.id.friendsInfoFirstNameDisplay);
@@ -71,6 +81,8 @@ public class FragUser extends ListFragBase {
         firstNameText = mainActivity.findViewById(R.id.friendsInfoFirstName);
         lastNameText = mainActivity.findViewById(R.id.friendsInfoLastName);
 
+        userFAB = mainActivity.findViewById(R.id.addServerFAB);
+
         setUserDisplays();
 
         favServersList = new ArrayList<>();
@@ -80,14 +92,26 @@ public class FragUser extends ListFragBase {
         // requestMyServers(requestQueue, mainActivity.uuid);
         requestMyServers(requestQueue, uuid);
 
-        if (mainActivity.friendsTabSelected != 0) {
-            toggleDisplaysVisibility(false);
+        switch (mainActivity.userTabSelected) {
+            case 0:
+                toggleDisplaysVisibility(true);
+                userFAB.setVisibility(View.GONE);
+                break;
+            case 1:
+                toggleDisplaysVisibility(false);
+                userFAB.setVisibility(View.VISIBLE);
+                break;
+            case 2:
+                toggleDisplaysVisibility(false);
+                userFAB.setVisibility(View.GONE);
+                break;
         }
 
         userTabsSelect = new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (notReady) {
+                    toggleDisplaysVisibility(false);
                     return;
                 }
                 userServerList.clear();
@@ -95,16 +119,19 @@ public class FragUser extends ListFragBase {
                     case 0:
                         mainActivity.userTabSelected = 0;
                         toggleDisplaysVisibility(true);
+                        userFAB.setVisibility(View.GONE);
                         break;
                     case 1:
                         mainActivity.userTabSelected = 1;
                         userServerList.addAll(myServersList);
                         toggleDisplaysVisibility(false);
+                        userFAB.setVisibility(View.VISIBLE);
                         break;
                     case 2:
                         mainActivity.userTabSelected = 2;
                         userServerList.addAll(favServersList);
                         toggleDisplaysVisibility(false);
+                        userFAB.setVisibility(View.GONE);
                         break;
                 }
                 userAdapter.notifyDataSetChanged();
@@ -119,6 +146,111 @@ public class FragUser extends ListFragBase {
             }
         };
         mainActivity.friendsTabs.addOnTabSelectedListener(userTabsSelect);
+
+        userFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final LayoutInflater inflater = LayoutInflater.from(getActivity());
+                final View addServerDialogView = inflater.inflate(R.layout.dialog_add_server, null);
+                AlertDialog.Builder addServerDialogBuilder = new AlertDialog.Builder(getActivity());
+                addServerDialogBuilder.setView(addServerDialogView);
+
+                final MultiAutoCompleteTextView addServerAutoComplete = addServerDialogView.findViewById(R.id.addServerGameAutoComplete);
+                addServerAutoComplete.setAdapter(new ArrayAdapter<>(getActivity(),
+                        android.R.layout.simple_dropdown_item_1line, mainActivity.getAllGames()));
+                addServerAutoComplete.setThreshold(1);
+                addServerAutoComplete.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+                addServerAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        String selectedGame = (String) parent.getItemAtPosition(position);
+                        addServerAutoComplete.setText(selectedGame);
+                    }
+                });
+
+                addServerDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        View addServerConfirmDialogView = inflater.inflate(R.layout.dialog_confirm_add_server, null);
+                        String name = ((EditText) addServerDialogView.findViewById(R.id.addServerNameEdit)).getText().toString();
+                        String game = addServerAutoComplete.getText().toString();
+                        String ip = ((EditText) addServerDialogView.findViewById(R.id.addServerIPEdit)).getText().toString();
+                        String playerCap = ((EditText) addServerDialogView.findViewById(R.id.addServerPlayerCapEdit)).getText().toString();
+
+                        showAddServerConfirmDialog(addServerConfirmDialogView, name, game, ip, playerCap);
+                    }
+                });
+                AlertDialog addServerDialog = addServerDialogBuilder.create();
+                addServerDialog.show();
+                addServerDialog.getWindow().setLayout(585, 820);
+            }
+        });
+    }
+
+    private void showAddServerConfirmDialog(final View dialogView, final String name, final String game, final String ip, final String playerCap) {
+        if (name.equals("") || game.equals("") || ip.equals("")) {
+            Toast.makeText(getActivity(), "Required field missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int indexOf = Arrays.asList(mainActivity.getAllGames()).indexOf(game);
+        String gameUUID;
+        if (indexOf == -1) {
+            Toast.makeText(getActivity(), "Invalid game", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            gameUUID = mainActivity.getAllGamesUUIDs()[indexOf];
+        }
+        AlertDialog.Builder addServerConfirmDialogBuilder = new AlertDialog.Builder(getActivity());
+        addServerConfirmDialogBuilder.setView(dialogView);
+        addServerConfirmDialogBuilder.setTitle("Add the following server?");
+        ((TextView) dialogView.findViewById(R.id.confirmAddServerName)).setText(name);
+        ((TextView) dialogView.findViewById(R.id.confirmAddServerGame)).setText(gameUUID);
+        ((TextView) dialogView.findViewById(R.id.confirmAddServerIP)).setText(ip);
+        ((TextView) dialogView.findViewById(R.id.confirmAddServerPlayerCount)).setText(playerCap);
+        addServerConfirmDialogBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String additionalData = ((EditText) dialogView.findViewById(R.id.confirmAddServerAdditionalDataEdit)).getText().toString();
+                addServer(name, game, ip, playerCap, additionalData);
+            }
+        });
+        addServerConfirmDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        AlertDialog addServerConfirmDialog = addServerConfirmDialogBuilder.create();
+        addServerConfirmDialog.show();
+    }
+
+    private void addServer(String name, String game, String ip, String playerCap, String additionalData) {
+        JSONObject userdata = new JSONObject();
+        try {
+            userdata.put("name", name);
+            userdata.put("game", "67f105531a0041479ee91de939a1f192");
+            userdata.put("ip", ip);
+            userdata.put("creator", mainActivity.uuid);
+            if (playerCap.equals("")) {
+                userdata.put("playercount", "None");
+            } else {
+                userdata.put("playercount", playerCap);
+            }
+            userdata.put("additionaldata", additionalData);
+        } catch (JSONException exception) {
+            Log.e("addServer JSONException", "Something went wrong when constructing addServer userdata JSONObject");
+        }
+        JSONObject finalQuery = new JSONObject();
+        FGEncrypt fgEncrypt = new FGEncrypt();
+        try {
+            finalQuery.put("key", mainActivity.master);
+            finalQuery.put("userdata", fgEncrypt.encrypt(userdata.toString()));
+        } catch (JSONException exception) {
+            Log.e("addServer JSONException", "Something went wrong when constructing addServer finalQuery JSONObject");
+        }
+        Log.d("userdata unencrypted", userdata.toString());
+        Log.d("addserver final", finalQuery.toString());
+        new FGAsyncTask().execute("https://fewgamers.com/api/server/", finalQuery.toString(), "POST");
     }
 
     private void toggleDisplaysVisibility(boolean b) {
@@ -166,6 +298,7 @@ public class FragUser extends ListFragBase {
                 setListAdapter(userAdapter);
 
                 // laden is voorbij
+                notReady = false;
                 mainActivity.mainProgressBar.setVisibility(View.GONE);
             }
         }, new Response.ErrorListener() {

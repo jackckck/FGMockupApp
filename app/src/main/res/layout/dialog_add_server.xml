@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/addServerNameEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:layout_marginTop="@dimen/twentydp"
+        android:ems="7"
+        android:hint="Server name" />
+
+    <MultiAutoCompleteTextView
+        android:id="@+id/addServerGameAutoComplete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:ems="7"
+        android:hint="Game" />
+
+    <EditText
+        android:id="@+id/addServerIPEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:ems="7"
+        android:hint="IP" />
+
+    <EditText
+        android:id="@+id/addServerPlayerCapEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/twentydp"
+        android:ems="7"
+        android:hint="Maximum players" />
+</LinearLayout>
