@@ -1,18 +1,10 @@
 package com.fewgamers.fgmockup;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.ListFragment;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -22,15 +14,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -41,14 +27,11 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.prefs.Preferences;
 
 /**
  * Created by Administrator on 12/6/2017.
@@ -67,9 +50,7 @@ public class FragServerBrowser extends ListFragBase {
     Boolean sortingDirectionIsDown = true;
     Boolean isSortedAlphabetically = true;
 
-    String serverListString;
-
-    Integer[] playerLimits;
+    Integer[] maxPlayerLimits;
     String[] allowedGames;
 
     Boolean hideEmpty, hideFull;
@@ -213,30 +194,6 @@ public class FragServerBrowser extends ListFragBase {
         mainActivity.serverSearchFilter = search;
     }
 
-    private void playerCountFilter() {
-        Integer[] playerLimit = mainActivity.playerCountLimit;
-        Integer playerMin, playerMax, maxPlayerMin, maxPlayerMax, livePlayer, maxPlayer;
-        playerMin = playerLimit[0];
-        playerMax = playerLimit[1];
-        maxPlayerMin = playerLimit[2];
-        maxPlayerMax = playerLimit[3];
-
-        for (int i = 0; i < serverListAlphabetical.size(); i++) {
-            ServerObject so = serverListAlphabetical.get(i);
-            livePlayer = so.getLivePlayer();
-            if ((playerMin != null && livePlayer < playerMin) || (playerMax != null && playerMax < livePlayer)) {
-                serverListAlphabetical.remove(i);
-                serverListByPlayers.remove(so);
-                break;
-            }
-            maxPlayer = so.getMaxPlayer();
-            if ((maxPlayerMin != null && maxPlayer < maxPlayerMin) || (maxPlayerMax != null && maxPlayerMax < maxPlayer)) {
-                serverListAlphabetical.remove(i);
-                serverListByPlayers.remove(so);
-            }
-        }
-    }
-
     private void pickSortingMethod() {
         AlertDialog.Builder sortingBuilder = new AlertDialog.Builder(getActivity());
         sortingBuilder.setTitle("Sort by ...")
@@ -247,7 +204,7 @@ public class FragServerBrowser extends ListFragBase {
                     }
 
                 })
-                .setNegativeButton("Live players", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Max players", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         setNumerical();
@@ -322,19 +279,17 @@ public class FragServerBrowser extends ListFragBase {
 
         for (int i = 0; i < jsonArray.length(); i++) {
             ServerObject serverObject = new ServerObject();
-
             try {
                 serverObject.defineServer(jsonArray.getJSONObject(i));
             } catch (JSONException exception) {
                 Log.e("Server data missing", "Some property of the server object could not be found inside the JSON string.");
             }
 
-            Integer playerCount, playerCap;
-            playerCount = serverObject.getLivePlayer();
-            playerCap = serverObject.getMaxPlayer();
-            String game = serverObject.getGame();
+            Integer maxPlayer;
+            maxPlayer = serverObject.getMaxPlayer();
+            String game = serverObject.getGameUUID();
 
-            if (passesFilter(playerCount, playerCap, game)) {
+            if (passesFilter(maxPlayer, game)) {
                 Integer j = successCounter - 1;
 
                 while (j > -1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
@@ -344,7 +299,7 @@ public class FragServerBrowser extends ListFragBase {
 
                 j = successCounter - 1;
 
-                while (j > -1 && resNumerical.get(j).getLivePlayer() < serverObject.getLivePlayer()) {
+                while (j > -1 && resNumerical.get(j).getMaxPlayer() < serverObject.getMaxPlayer()) {
                     j--;
                 }
                 resNumerical.add(j + 1, serverObject);
@@ -360,52 +315,32 @@ public class FragServerBrowser extends ListFragBase {
     }
 
     private void getFilterPreferences() {
-        playerLimits = new Integer[4];
-        String[] strings0, strings1;
+        maxPlayerLimits = new Integer[2];
 
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
-        strings0 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercount_key), "null-null").split("-");
-        strings1 = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null-null").split("-");
+        String[] strings = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null-null").split("-");
 
-        if (strings0[0].equals("null")) {
-            playerLimits[0] = -1;
+        if (strings[0].equals("null")) {
+            maxPlayerLimits[0] = -1;
         } else {
-            playerLimits[0] = Integer.parseInt(strings0[0]);
+            maxPlayerLimits[0] = Integer.parseInt(strings[0]);
         }
-        if (strings0[1].equals("null")) {
-            playerLimits[1] = 1000;
+        if (strings[1].equals("null")) {
+            maxPlayerLimits[1] = 1000;
         } else {
-            playerLimits[1] = Integer.parseInt(strings0[1]);
-        }
-        if (strings1[0].equals("null")) {
-            playerLimits[2] = -1;
-        } else {
-            playerLimits[2] = Integer.parseInt(strings1[0]);
-        }
-        if (strings1[1].equals("null")) {
-            playerLimits[3] = 1000;
-        } else {
-            playerLimits[3] = Integer.parseInt(strings0[1]);
+            maxPlayerLimits[1] = Integer.parseInt(strings[1]);
         }
 
-        hideEmpty = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_empty_key), false);
         hideFull = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_full_key), false);
 
         allowedGames = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_game_filter_key), "").split(",,");
         gamesFilterActive = (allowedGames.length > 0);
     }
 
-    private boolean passesFilter(Integer playerCount, Integer playerCap, String game) {
-        if (hideEmpty && playerCount.equals(0)) {
+    private boolean passesFilter(Integer maxPlayer, String game) {
+        if (maxPlayer < maxPlayerLimits[0] || maxPlayerLimits[1] < maxPlayer) {
             return false;
         }
-        if (hideFull && playerCount.equals(playerCap)) {
-            return false;
-        }
-        if (playerCount < playerLimits[0] || playerLimits[1] < playerCount || playerCap < playerLimits[2] || playerLimits[3] < playerCap) {
-            return false;
-        }
-
         return true;
     }
 }

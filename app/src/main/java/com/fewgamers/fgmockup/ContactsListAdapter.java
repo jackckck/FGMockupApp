@@ -16,13 +16,13 @@ import java.util.ArrayList;
 
 public class ContactsListAdapter extends ArrayAdapter<ContactObject> {
     private final Activity context;
-    private final ArrayList<ContactObject> friendList;
+    private final ArrayList<ContactObject> contactList;
 
-    public ContactsListAdapter(Activity context, ArrayList<ContactObject> friendList) {
-        super(context, R.layout.contact_list_item, friendList);
+    public ContactsListAdapter(Activity context, ArrayList<ContactObject> contactList) {
+        super(context, R.layout.contact_list_item, contactList);
 
         this.context = context;
-        this.friendList = friendList;
+        this.contactList = contactList;
     }
 
     @Override
@@ -30,22 +30,34 @@ public class ContactsListAdapter extends ArrayAdapter<ContactObject> {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View resView = inflater.inflate(R.layout.contact_list_item, parent, false);
-        final ContactObject thisFriend = friendList.get(position);
-        String relationStatus = thisFriend.getRelationStatus();
-        String status = thisFriend.getStatus();
+        final ContactObject thisContact = contactList.get(position);
+        String relationStatus = thisContact.getRelationStatus();
+        String accountStatus = thisContact.getAccountStatus();
 
-        TextView friendName, friendEMail, friendStatus;
-        friendName = (TextView) resView.findViewById(R.id.friendName);
-        friendEMail = (TextView) resView.findViewById(R.id.friendEMail);
-        friendStatus = (TextView) resView.findViewById(R.id.friendStatus);
+        TextView nameText, emailText, accountStatusText;
+        nameText = (TextView) resView.findViewById(R.id.contactName);
+        emailText = (TextView) resView.findViewById(R.id.contactEmail);
+        accountStatusText = (TextView) resView.findViewById(R.id.contactAccountStatus);
 
-        friendName.setText(thisFriend.getUsername());
+        nameText.setText(thisContact.getUsername());
 
-        if (relationStatus.equals("FA")) {
-            friendEMail.setText(thisFriend.getEmail());
+        if (!relationStatus.equals("B")) {
+            emailText.setText(thisContact.getEmail());
         }
 
-        friendStatus.setText(status);
+        String accountStatusRead = "";
+        switch (accountStatus) {
+            case "A":
+                accountStatusRead = "Active";
+                break;
+            case "U":
+                accountStatusRead = "Inactive";
+                break;
+            case "B":
+                accountStatusRead = "Banned";
+                break;
+        }
+        accountStatusText.setText(accountStatusRead);
 
         return resView;
     }

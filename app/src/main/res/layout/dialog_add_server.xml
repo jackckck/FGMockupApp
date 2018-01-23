@@ -35,5 +35,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
         android:ems="7"
-        android:hint="Maximum players" />
+        android:hint="Max players"
+        android:inputType="number" />
 </LinearLayout>

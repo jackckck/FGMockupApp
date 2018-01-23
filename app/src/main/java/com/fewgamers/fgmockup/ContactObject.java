@@ -11,7 +11,7 @@ import org.json.JSONObject;
  */
 
 public class ContactObject {
-    private String uuid, username, email, firstName, lastName, status, relationStatus;
+    private String uuid, username, email, firstName, lastName, accountStatus, relationStatus;
 
     public ContactObject() {
         this.uuid = "";
@@ -19,7 +19,7 @@ public class ContactObject {
         this.email = "";
         this.firstName = "";
         this.lastName = "";
-        this.status = "";
+        this.accountStatus = "";
     }
 
     public void defineContact(String contactString, String relationStatus) {
@@ -30,23 +30,16 @@ public class ContactObject {
             try {
                 this.uuid = thisContact.getString("uuid");
                 this.username = thisContact.getString("nickname");
-                this.status = thisContact.getString("status");
+                this.accountStatus = thisContact.getString("status");
+                if (thisContact.getString("emailprivate").equals("False")) {
+                    this.email = thisContact.getString("email");
+                }
+                if (thisContact.getString("nameprivate").equals("True")) {
+                    this.firstName = thisContact.getString("firstname");
+                    this.lastName = thisContact.getString("lastname");
+                }
             } catch (JSONException exception) {
                 Log.e("Corrupt friend", "Friend data incomplete");
-            }
-            try {
-                this.email = thisContact.getString("email");
-            } catch (JSONException exception) {
-                Log.d("Email private", this.uuid + "'s email is private");
-                this.email = "";
-            }
-            try {
-                this.firstName = thisContact.getString("firstname");
-                this.lastName = thisContact.getString("lastname");
-            } catch (JSONException exception) {
-                Log.d("Name private", this.uuid + "'s name is private");
-                this.firstName = "";
-                this.lastName = "";
             }
         } catch (JSONException exception) {
             Log.e("User string error", "User string could not be formatted to JSONobject");
@@ -67,8 +60,8 @@ public class ContactObject {
         return email;
     }
 
-    public String getStatus() {
-        return status;
+    public String getAccountStatus() {
+        return accountStatus;
     }
 
     public String getRelationStatus() {
@@ -91,7 +84,7 @@ public class ContactObject {
         this.email = email;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setAccountStatus(String status) {
+        this.accountStatus = status;
     }
 }

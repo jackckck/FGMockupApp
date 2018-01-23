@@ -18,10 +18,11 @@ import java.net.URL;
  * Created by Administrator on 12/28/2017.
  */
 
-public class FGAsyncTask extends AsyncTask<String, Void, String> {
+public class FGAsyncTask extends AsyncTask<String, Void, String[]> {
     @Override
-    protected String doInBackground(String... strings) {
-        String response = "";
+    protected String[] doInBackground(String... strings) {
+        String[] response = new String[2];
+        Integer responseCode;
         boolean errorOccured = false;
         try {
             URL url = new URL(strings[0]);
@@ -37,7 +38,7 @@ public class FGAsyncTask extends AsyncTask<String, Void, String> {
                 streamOut.flush();
                 streamOut.close();
             }
-            int responseCode = connection.getResponseCode();
+            responseCode = connection.getResponseCode();
             Log.d("Response Code", responseCode + "");
 
             errorOccured = (responseCode >= 400);
@@ -55,15 +56,13 @@ public class FGAsyncTask extends AsyncTask<String, Void, String> {
                 responseOutput.append(line);
             }
 
-            response = responseOutput.toString();
-            Log.d("Response Output", response);
+            response[0] = responseCode.toString();
+            response[1] = responseOutput.toString();
+            Log.d("Response Output", response[1]);
 
             connection.disconnect();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        if (errorOccured) {
-            return "error";
         }
         return response;
     }

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +77,7 @@ public class PrefChangeUserInfo extends DialogPreference {
             confirmation.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    changeUserValue(newValue);
+                    changeUserValue(mainActivity.uuid, whichValue, newValue, mainActivity.master);
                 }
             });
             confirmation.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -88,14 +89,13 @@ public class PrefChangeUserInfo extends DialogPreference {
         }
     }
 
-    private void changeUserValue(String newValue) {
+    private void changeUserValue(String uuid, String whichValue, String newValue, String master) {
         JSONObject userData = new JSONObject();
-        JSONObject finalChangeQuery = new JSONObject();
         String encryptedUserDataString;
         FGEncrypt fgEncrypt = new FGEncrypt();
 
         try {
-            userData.put("uuid", mainActivity.uuid);
+            userData.put("uuid", uuid);
             userData.put(whichValue, newValue);
         } catch (JSONException exception) {
             exception.printStackTrace();
@@ -104,36 +104,35 @@ public class PrefChangeUserInfo extends DialogPreference {
         Log.d("userdata", userData.toString());
 
         encryptedUserDataString = fgEncrypt.encrypt(userData.toString());
+        String finalQuery = fgEncrypt.getFinalQuery(encryptedUserDataString, mainActivity.master);
 
-        try {
-            finalChangeQuery.put("key", mainActivity.master);
-            finalChangeQuery.put("userdata", encryptedUserDataString);
-        } catch (JSONException exception) {
-            exception.printStackTrace();
-        }
         Log.d("encrypted userdata", encryptedUserDataString);
-        Log.d("let op!", finalChangeQuery.toString());
+        Log.d("final change query", finalQuery);
         if (newValue != null && !newValue.equals("")) {
-            new ChangeUserInfoAsyncTask().execute("https://fewgamers.com/api/user/", finalChangeQuery.toString(), "PATCH");
+            new ChangeUserInfoAsyncTask().execute("https://fewgamers.com/api/user/", finalQuery, "PATCH");
         }
     }
 
     private class ChangeUserInfoAsyncTask extends FGAsyncTask {
         @Override
-        protected void onPostExecute(String response) {
-            switch (whichValue) {
-                case "email":
-                    mainActivity.email = newValue;
-                    break;
-                case "username":
-                    mainActivity.username = newValue;
-                    break;
-                case "firstname":
-                    mainActivity.firstName = newValue;
-                    break;
-                case "lastname":
-                    mainActivity.lastName = newValue;
-                    break;
+        protected void onPostExecute(String[] response) {
+            if (response[0].equals("200")) {
+                switch (whichValue) {
+                    case "email":
+                        mainActivity.email = newValue;
+                        break;
+                    case "username":
+                        mainActivity.username = newValue;
+                        break;
+                    case "firstname":
+                        mainActivity.firstName = newValue;
+                        break;
+                    case "lastname":
+                        mainActivity.lastName = newValue;
+                        break;
+                }
+            } else {
+                Toast.makeText(mainActivity, "User info change failed", Toast.LENGTH_SHORT).show();
             }
         }
     }

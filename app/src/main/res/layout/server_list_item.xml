@@ -23,7 +23,6 @@
         android:layout_alignTop="@id/serverIcon"
         android:layout_marginTop="@dimen/fivedp"
         android:layout_toEndOf="@id/serverIcon"
-        android:text="Server name"
         android:textSize="@dimen/server_font_size" />
 
     <TextView
@@ -33,16 +32,14 @@
         android:layout_alignBottom="@id/serverIcon"
         android:layout_marginBottom="@dimen/fivedp"
         android:layout_toEndOf="@id/serverIcon"
-        android:text="192.168.2.10"
         android:textSize="@dimen/server_font_size" />
 
     <TextView
-        android:id="@+id/playerCount"
+        android:id="@+id/playerCap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_marginRight="@dimen/fivedp"
-        android:text="8/10"
         android:textSize="@dimen/server_font_size" />
 
     <TextView
@@ -53,7 +50,6 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="@dimen/fivedp"
         android:layout_marginRight="@dimen/fivedp"
-        android:text="CoD 2"
         android:textSize="@dimen/server_font_size" />
 
 </RelativeLayout>

@@ -27,8 +27,12 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -43,7 +47,8 @@ public class MainActivity extends AppCompatActivity
 
     public Integer[] playerCountLimit = new Integer[4];
 
-    private String[] allGames, allGamesUUIDs;
+    private String[] allGamesArray, allGamesUUIDsArray;
+    Map<String, String> allGamesMap = new HashMap<>();
 
     public SharedPreferences mainSharedPreferences;
 
@@ -104,7 +109,7 @@ public class MainActivity extends AppCompatActivity
         this.firstName = mainSharedPreferences.getString("firstName", "None");
         this.lastName = mainSharedPreferences.getString("lastName", "None");
         this.key = mainSharedPreferences.getString("key", null);
-        this.master = "d54e4e7f04284ffb8662be06337cd09f";
+        this.master = getResources().getString(R.string.master);
         this.activactionCode = mainSharedPreferences.getString("activationCode", null);
 
         this.urlKey = "&key=" + this.key;
@@ -119,11 +124,15 @@ public class MainActivity extends AppCompatActivity
             public void onResponse(String response) {
                 try {
                     JSONArray jsonArray = new JSONArray(response);
-                    allGames = new String[jsonArray.length()];
-                    allGamesUUIDs = new String[jsonArray.length()];
+                    allGamesArray = new String[jsonArray.length()];
+                    allGamesUUIDsArray = new String[jsonArray.length()];
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        allGames[i] = jsonArray.getJSONObject(i).getString("name");
-                        allGamesUUIDs[i] = jsonArray.getJSONObject(i).getString("uuid");
+                        JSONObject gameObject = jsonArray.getJSONObject(i);
+                        String gameName = gameObject.getString("name");
+                        String gameUUID = gameObject.getString("uuid");
+                        allGamesMap.put(gameUUID, gameName);
+                        allGamesArray[i] = gameName;
+                        allGamesUUIDsArray[i] = gameUUID;
                     }
                 } catch (JSONException exception) {
                     Log.e("JSONarray error", "Couldn't format the response string to JSON array");
@@ -136,12 +145,21 @@ public class MainActivity extends AppCompatActivity
         }));
     }
 
-    public String[] getAllGames() {
-        return allGames;
+    public String[] getAllGamesArray() {
+        return allGamesArray;
     }
 
-    public String[] getAllGamesUUIDs() {
-        return allGamesUUIDs;
+    public String[] getAllGamesUUIDsArray() {
+        return allGamesUUIDsArray;
+    }
+
+    public String getGameNameFromUUID(String uuid) {
+        return allGamesMap.get(uuid);
+    }
+
+    public String getGameUUIDFromName(String name) {
+        int indexOf = Arrays.asList(this.allGamesArray).indexOf(name);
+        return allGamesUUIDsArray[indexOf];
     }
 
     @Override
@@ -241,6 +259,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if (previousFragId.size() > 0 && previousFragId.get(0) == id) {
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        }
         previousFragId.add(0, id);
         DisplayFragment(id);
         return true;

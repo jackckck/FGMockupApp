@@ -15,9 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 /**
  * Created by Administrator on 1/12/2018.
  */
@@ -40,8 +37,8 @@ public class PrefGameFilter extends DialogPreference {
         super(c, attrs);
 
         mainActivity = (MainActivity) c;
-        allGames = mainActivity.getAllGames();
-        allGamesUUIDs = mainActivity.getAllGamesUUIDs();
+        allGames = mainActivity.getAllGamesArray();
+        allGamesUUIDs = mainActivity.getAllGamesUUIDsArray();
 
         setDialogLayoutResource(R.layout.pref_game_filter);
         setPositiveButtonText("Apply");

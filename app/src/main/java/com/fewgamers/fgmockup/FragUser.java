@@ -1,12 +1,7 @@
 package com.fewgamers.fgmockup;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.ListFragment;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -19,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,16 +36,12 @@ import java.util.Arrays;
 
 public class FragUser extends ListFragBase {
 
-    String myServersString, favServersString;
-    ArrayList<ServerObject> userServerList, myServersList, favServersList;
-
-    String uuid = "2532ef98f6034792baf22471073683f6";
+    ArrayList<ServerObject> myServersList, currentServersList;
 
     ServerListAdapter userAdapter;
 
-    TabLayout.OnTabSelectedListener userTabsSelect;
-
-    TextView usernameText, emailText, firstNameText, lastNameText, usernameDisplay, emailDisplay, firstNameDisplay, lastNameDisplay;
+    TextView usernameText, emailText, firstNameText, lastNameText, usernameDisplay,
+            emailDisplay, firstNameDisplay, lastNameDisplay, noServersFoundText;
 
     private boolean notReady = true;
 
@@ -60,7 +50,7 @@ public class FragUser extends ListFragBase {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fraguserinfo, container, false);
+        return inflater.inflate(R.layout.fraguser, container, false);
     }
 
     @Override
@@ -69,6 +59,16 @@ public class FragUser extends ListFragBase {
         mainActivity = (MainActivity) getActivity();
         // laden begint
         mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
+
+        // adapter instellen
+        myServersList = new ArrayList<>();
+        currentServersList = new ArrayList<>();
+        userAdapter = new ServerListAdapter(getActivity(), currentServersList);
+        setListAdapter(userAdapter);
+
+        // eigen servers ophalen
+        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+        requestMyServers(requestQueue, mainActivity.uuid);
 
         // widgets ophalen
         usernameDisplay = mainActivity.findViewById(R.id.friendsInfoUsernameDisplay);
@@ -81,16 +81,11 @@ public class FragUser extends ListFragBase {
         firstNameText = mainActivity.findViewById(R.id.friendsInfoFirstName);
         lastNameText = mainActivity.findViewById(R.id.friendsInfoLastName);
 
+        noServersFoundText = mainActivity.findViewById(R.id.userInfoNoServersFoundText);
+
         userFAB = mainActivity.findViewById(R.id.addServerFAB);
 
         setUserDisplays();
-
-        favServersList = new ArrayList<>();
-
-        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
-
-        // requestMyServers(requestQueue, mainActivity.uuid);
-        requestMyServers(requestQueue, uuid);
 
         switch (mainActivity.userTabSelected) {
             case 0:
@@ -107,31 +102,33 @@ public class FragUser extends ListFragBase {
                 break;
         }
 
-        userTabsSelect = new TabLayout.OnTabSelectedListener() {
+        mainActivity.friendsTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (notReady) {
                     toggleDisplaysVisibility(false);
                     return;
                 }
-                userServerList.clear();
+                currentServersList.clear();
                 switch (tab.getPosition()) {
                     case 0:
                         mainActivity.userTabSelected = 0;
                         toggleDisplaysVisibility(true);
                         userFAB.setVisibility(View.GONE);
+                        noServersFoundText.setVisibility(View.GONE);
                         break;
                     case 1:
                         mainActivity.userTabSelected = 1;
-                        userServerList.addAll(myServersList);
                         toggleDisplaysVisibility(false);
+                        currentServersList.addAll(myServersList);
                         userFAB.setVisibility(View.VISIBLE);
+                        noServersFoundText.setVisibility(View.VISIBLE);
                         break;
                     case 2:
                         mainActivity.userTabSelected = 2;
-                        userServerList.addAll(favServersList);
                         toggleDisplaysVisibility(false);
                         userFAB.setVisibility(View.GONE);
+                        noServersFoundText.setVisibility(View.GONE);
                         break;
                 }
                 userAdapter.notifyDataSetChanged();
@@ -144,8 +141,7 @@ public class FragUser extends ListFragBase {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
             }
-        };
-        mainActivity.friendsTabs.addOnTabSelectedListener(userTabsSelect);
+        });
 
         userFAB.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,7 +153,7 @@ public class FragUser extends ListFragBase {
 
                 final MultiAutoCompleteTextView addServerAutoComplete = addServerDialogView.findViewById(R.id.addServerGameAutoComplete);
                 addServerAutoComplete.setAdapter(new ArrayAdapter<>(getActivity(),
-                        android.R.layout.simple_dropdown_item_1line, mainActivity.getAllGames()));
+                        android.R.layout.simple_dropdown_item_1line, mainActivity.getAllGamesArray()));
                 addServerAutoComplete.setThreshold(1);
                 addServerAutoComplete.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
                 addServerAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -192,13 +188,13 @@ public class FragUser extends ListFragBase {
             Toast.makeText(getActivity(), "Required field missing", Toast.LENGTH_SHORT).show();
             return;
         }
-        int indexOf = Arrays.asList(mainActivity.getAllGames()).indexOf(game);
+        int indexOf = Arrays.asList(mainActivity.getAllGamesArray()).indexOf(game);
         String gameUUID;
         if (indexOf == -1) {
             Toast.makeText(getActivity(), "Invalid game", Toast.LENGTH_SHORT).show();
             return;
         } else {
-            gameUUID = mainActivity.getAllGamesUUIDs()[indexOf];
+            gameUUID = mainActivity.getAllGamesUUIDsArray()[indexOf];
         }
         AlertDialog.Builder addServerConfirmDialogBuilder = new AlertDialog.Builder(getActivity());
         addServerConfirmDialogBuilder.setView(dialogView);
@@ -211,7 +207,7 @@ public class FragUser extends ListFragBase {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String additionalData = ((EditText) dialogView.findViewById(R.id.confirmAddServerAdditionalDataEdit)).getText().toString();
-                addServer(name, game, ip, playerCap, additionalData);
+                addServer(name, mainActivity.getGameUUIDFromName(game), ip, playerCap, additionalData);
             }
         });
         addServerConfirmDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -224,11 +220,11 @@ public class FragUser extends ListFragBase {
         addServerConfirmDialog.show();
     }
 
-    private void addServer(String name, String game, String ip, String playerCap, String additionalData) {
+    private void addServer(String name, String gameUUID, String ip, String playerCap, String additionalData) {
         JSONObject userdata = new JSONObject();
         try {
             userdata.put("name", name);
-            userdata.put("game", "67f105531a0041479ee91de939a1f192");
+            userdata.put("game", gameUUID);
             userdata.put("ip", ip);
             userdata.put("creator", mainActivity.uuid);
             if (playerCap.equals("")) {
@@ -240,17 +236,12 @@ public class FragUser extends ListFragBase {
         } catch (JSONException exception) {
             Log.e("addServer JSONException", "Something went wrong when constructing addServer userdata JSONObject");
         }
-        JSONObject finalQuery = new JSONObject();
         FGEncrypt fgEncrypt = new FGEncrypt();
-        try {
-            finalQuery.put("key", mainActivity.master);
-            finalQuery.put("userdata", fgEncrypt.encrypt(userdata.toString()));
-        } catch (JSONException exception) {
-            Log.e("addServer JSONException", "Something went wrong when constructing addServer finalQuery JSONObject");
-        }
+        String encryptedUserdata = fgEncrypt.encrypt(userdata.toString());
+        String finalQuery = fgEncrypt.getFinalQuery(encryptedUserdata, mainActivity.master);
         Log.d("userdata unencrypted", userdata.toString());
-        Log.d("addserver final", finalQuery.toString());
-        new FGAsyncTask().execute("https://fewgamers.com/api/server/", finalQuery.toString(), "POST");
+        Log.d("addserver final", finalQuery);
+        new AddServerAsyncTask().execute("https://fewgamers.com/api/server/", finalQuery, "POST");
     }
 
     private void toggleDisplaysVisibility(boolean b) {
@@ -278,24 +269,18 @@ public class FragUser extends ListFragBase {
     }
 
     private void requestMyServers(RequestQueue requestQueue, String uuid) {
-        String urlString = "https://fewgamers.com/api/server/?uuid=" + uuid + mainActivity.urlKey;
+        String urlString = "https://fewgamers.com/api/server/?creator=" + uuid + "&key=" + mainActivity.master;
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, urlString, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                Log.d("Volley my servers", response);
+                myServersList.clear();
                 myServersList = getMyServerListFromString(response);
 
-                switch (mainActivity.userTabSelected) {
-                    case 1:
-                        userServerList = new ArrayList<>(myServersList);
-                        break;
-                    case 2:
-                        userServerList = new ArrayList<>(favServersList);
-                        break;
-                    default:
-                        userServerList = new ArrayList<>();
+                currentServersList.clear();
+                if (mainActivity.userTabSelected == 1) {
+                    userAdapter.addAll(myServersList);
                 }
-                userAdapter = new ServerListAdapter(getActivity(), userServerList);
-                setListAdapter(userAdapter);
 
                 // laden is voorbij
                 notReady = false;
@@ -304,14 +289,17 @@ public class FragUser extends ListFragBase {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("/api/server/?uuid error", error.toString());
+                mainActivity.mainProgressBar.setVisibility(View.GONE);
+                ((TextView) getActivity().findViewById(R.id.userInfoNoServersFoundText)).setText("No servers found");
+                toggleDisplaysVisibility(true);
+                notReady = false;
             }
         });
 
         requestQueue.add(stringRequest);
     }
 
-    private ArrayList<ServerObject> getMyServerListFromString(String string) {
+    public static ArrayList<ServerObject> getMyServerListFromString(String string) {
         ArrayList<ServerObject> res = new ArrayList<>();
         try {
             JSONArray jsonArray = new JSONArray(string);
@@ -325,5 +313,26 @@ public class FragUser extends ListFragBase {
             Log.e("Server error", "Couldn't extract server list from string");
         }
         return res;
+    }
+
+    private class AddServerAsyncTask extends FGAsyncTask {
+        @Override
+        protected void onPostExecute(String[] response) {
+            if (response[0].equals("201")) {
+                try {
+                    JSONObject newlyAddedJSON = new JSONObject(response[1]);
+                    ServerObject newlyAddedServer = new ServerObject();
+                    newlyAddedServer.defineServer(newlyAddedJSON);
+                    userAdapter.add(newlyAddedServer);
+                    noServersFoundText.setVisibility(View.GONE);
+                } catch (JSONException exception) {
+                    Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();
+                }
+            } else if (response[1].equals("{'error': 'unique userdata already exists'}")) {
+                Toast.makeText(mainActivity, "Name or IP is already in use", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), "Failed to add server", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

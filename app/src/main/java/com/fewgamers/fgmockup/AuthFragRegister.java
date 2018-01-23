@@ -3,12 +3,17 @@ package com.fewgamers.fgmockup;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by Administrator on 12/30/2017.
@@ -18,7 +23,6 @@ public class AuthFragRegister extends android.support.v4.app.Fragment {
     EditText registerUsernameDisplay, registerFirstNameDisplay, registerLastNameDisplay,
             registerEmailDisplay, registerPasswordDisplay;
     Button registerButton;
-    TextView registerFail;
 
     String username, firstName, lastName, email, password;
 
@@ -43,42 +47,41 @@ public class AuthFragRegister extends android.support.v4.app.Fragment {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                registerUser();
+                registerUser(registerEmailDisplay.getText().toString(), registerUsernameDisplay.getText().toString(),
+                        registerPasswordDisplay.getText().toString(), registerFirstNameDisplay.getText().toString(),
+                        registerLastNameDisplay.getText().toString());
             }
         });
-
-        registerFail = getActivity().findViewById(R.id.registerFailText);
     }
 
-    private void registerUser() {
-        username = registerUsernameDisplay.getText().toString();
-        firstName = registerFirstNameDisplay.getText().toString();
-        lastName = registerLastNameDisplay.getText().toString();
-        email = registerEmailDisplay.getText().toString();
-        password = registerPasswordDisplay.getText().toString();
-
+    private void registerUser(String email, String username, String password, String firstName, String lastName) {
         if (username.equals(null) || email.equals(null) || password.equals(null) || username.equals("") || email.equals("") || password.equals("")) {
-            registerFail.setText("Incomplete user data");
+            Toast.makeText(getActivity(), "Required field missing", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        new RegisterAsyncTask().execute("http://www.fewgamers.com/api/register/", "");
+        try {
+            JSONObject registerObject = new JSONObject();
+            registerObject.put("email", email);
+            registerObject.put("username", username);
+            registerObject.put("password", password);
+            registerObject.put("firstname", firstName);
+            registerObject.put("lastname", lastName);
+            Log.d("register", registerObject.toString());
+            new RegisterAsyncTask().execute("https:/fewgamers.com/register/", registerObject.toString(), "POST");
+        } catch (JSONException exception) {
+            exception.printStackTrace();
+            Toast.makeText(getActivity(), "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class RegisterAsyncTask extends FGAsyncTask {
         @Override
-        protected void onPostExecute(String response) {
-            registerAlert();
+        protected void onPostExecute(String[] response) {
+            switch (response[0]) {
+                case "201":
+                    Toast.makeText(getActivity(), "Registration succesful", Toast.LENGTH_SHORT).show();
+            }
         }
-    }
-
-    private void registerAlert() {
-        registerFail.setText("");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Confirmation email has been sent");
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-        alertDialog.getWindow().setLayout(850, 220);
     }
 }

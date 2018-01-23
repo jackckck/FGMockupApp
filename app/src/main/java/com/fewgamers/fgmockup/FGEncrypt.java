@@ -1,5 +1,10 @@
 package com.fewgamers.fgmockup;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -83,5 +88,18 @@ public class FGEncrypt {
             hexChars[i * 2 + 1] = hexArray[val & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public String getFinalQuery(String encryptedUserdata, String master) {
+        String res = null;
+        try {
+            JSONObject finalQuery = new JSONObject();
+            finalQuery.put("key", master);
+            finalQuery.put("userdata", encryptedUserdata);
+            res = finalQuery.toString();
+        } catch (JSONException exception) {
+            exception.printStackTrace();
+        }
+        return res;
     }
 }

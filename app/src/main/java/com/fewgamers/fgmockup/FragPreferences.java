@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,6 +42,10 @@ public class FragPreferences extends PreferenceFragment {
         boolean nameIsVisible = defaultPreferences.getBoolean(getResources().getString(R.string.pref_name_visible_key), true);
 
         this.makePrivate("email", emailIsVisible, nameIsVisible);
+
+        boolean notificationsAreAllowed = defaultPreferences.getBoolean(getResources().getString(R.string.pref_notifications_allow_notifications_key), true);
+
+        blockNotifications(notificationsAreAllowed);
     }
 
     private void makePrivate(String value, boolean emailIsVisible, boolean nameIsVisible) {
@@ -62,17 +68,39 @@ public class FragPreferences extends PreferenceFragment {
             userdata.put("nameprivate", namePrivate);
             encryptedUserdata = fgEncrypt.encrypt(userdata.toString());
 
-            Log.d("userdata", userdata.toString());
+            Log.d("userdata unencrypted", userdata.toString());
 
-            JSONObject finalQuery = new JSONObject();
-            finalQuery.put("key", ((MainActivity) getActivity()).master);
-            finalQuery.put("userdata", encryptedUserdata);
+            String finalQuery = fgEncrypt.getFinalQuery(encryptedUserdata, getResources().getString(R.string.master));
+            Log.d("finalquery", finalQuery);
 
-            Log.d("finalquery", finalQuery.toString());
-
-            new FGAsyncTask().execute("https://fewgamers.com/api/user/", finalQuery.toString(), "PATCH");
+            new FGAsyncTask().execute("https://fewgamers.com/api/user/", finalQuery, "PATCH");
         } catch (JSONException exception) {
             Log.e("Userdata error", "Something went wrong when formatting JSON strings");
+        }
+    }
+
+    private void blockNotifications(boolean allowed) {
+        FGEncrypt fgEncrypt = new FGEncrypt();
+
+        String pushkey;
+        if (allowed) {
+            pushkey = FirebaseInstanceId.getInstance().getToken();
+        } else {
+            pushkey = "None";
+        }
+        try {
+            JSONObject userdata = new JSONObject();
+            userdata.put("uuid", ((MainActivity) getActivity()).uuid);
+            userdata.put("pushkey", pushkey);
+            String encryptedUserdata = fgEncrypt.encrypt(userdata.toString());
+
+            Log.d("userdata unencrypted", userdata.toString());
+
+            String finalQuery = fgEncrypt.getFinalQuery(encryptedUserdata, getResources().getString(R.string.master));
+
+            new FGAsyncTask().execute("https://fewgamers.com/api/user/", finalQuery, "PATCH");
+        } catch (JSONException exception) {
+            exception.printStackTrace();
         }
     }
 }

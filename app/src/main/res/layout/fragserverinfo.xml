@@ -35,6 +35,14 @@
         android:layout_below="@id/serverInfoIPAddress"
         android:text="Creator:" />
 
+    <TextView
+        android:id="@+id/serverInfoAdditionalData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/serverInfoCreatorUser"
+        android:layout_below="@id/serverInfoCreatorUser"
+        android:layout_marginTop="@dimen/tendp"
+        android:text="Additional info:" />
 
     <TextView
         android:id="@+id/serverInfoGameDisplay"
@@ -64,5 +72,14 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/serverInfoServerNameDisplay"
         android:layout_alignTop="@id/serverInfoCreatorUser" />
+
+    <TextView
+        android:id="@+id/serverInfoAdditionalDataDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/serverInfoAdditionalData"
+        android:layout_marginEnd="15dp"
+        android:layout_marginStart="@dimen/fivedp"
+        android:layout_toEndOf="@id/serverInfoAdditionalData" />
 
 </RelativeLayout>

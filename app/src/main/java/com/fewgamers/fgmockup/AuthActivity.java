@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+// De activity voor login en register. Beide functionaliteiten bevinden zich in afzonderlijke fragments
 public class AuthActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
