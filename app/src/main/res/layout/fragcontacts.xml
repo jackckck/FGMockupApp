@@ -10,6 +10,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"></ListView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@android:id/list"
+        android:background="@android:color/darker_gray"/>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/contactsFAB"
         android:layout_width="wrap_content"

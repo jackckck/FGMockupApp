@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="display_fragment_user_info_id">0</integer>
+    <integer name="display_fragment_server_info_id">1</integer>
+</resources>

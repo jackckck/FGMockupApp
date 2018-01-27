@@ -106,6 +106,7 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
     }
 
     private void checkLogin(String email, String pass) {
+        Log.d("token", FirebaseInstanceId.getInstance().getToken());
         String loginDataString, encryptedLoginDataString;
         JSONObject loginData = new JSONObject();
         JSONObject finalLogin = new JSONObject();

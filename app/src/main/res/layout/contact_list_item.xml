@@ -21,7 +21,6 @@
         android:layout_alignTop="@id/friendProfilePic"
         android:layout_marginTop="@dimen/fivedp"
         android:layout_toEndOf="@id/friendProfilePic"
-        android:text="Friend name"
         android:textSize="@dimen/friend_font_size" />
 
     <TextView

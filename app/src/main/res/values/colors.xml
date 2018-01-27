@@ -10,4 +10,6 @@
     <color name="errorColor">#ff2d2d</color>
 
     <color name="sendButtonColor">#48c494</color>
+
+    <color name="clickable_color">#587bd9</color>
 </resources>

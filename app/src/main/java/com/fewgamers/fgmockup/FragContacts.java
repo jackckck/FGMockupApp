@@ -32,15 +32,18 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Administrator on 12/6/2017.
  */
 
 public class FragContacts extends ListFragBase {
-    ArrayList<ContactObject> currentContactsList, friendsList, pendingList, blockedList;
+    ArrayList<ContactObject> currentContactsList, friendsList, pendingOutgoingList, pendingIncomingList, blockedList;
 
-    String[] allRegisteredUsernames, allRegisteredUUIDs;
+    String[] allRegisteredUsernames, allRegisteredEmails, allRegisteredUUIDs;
+    Map<String, String> registeredUUIDsMap = new HashMap<>();
 
     ContactsListAdapter contactsAdapter;
 
@@ -66,6 +69,9 @@ public class FragContacts extends ListFragBase {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        allRegisteredUsernames = new String[1];
+        allRegisteredUsernames[0] = "No users found";
+
         contactsQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
         // alle widgets ophalen;
@@ -77,7 +83,14 @@ public class FragContacts extends ListFragBase {
 
         currentContactsList = new ArrayList<>();
         friendsList = new ArrayList<>();
-        pendingList = new ArrayList<>();
+        pendingOutgoingList = new ArrayList<>();
+        ContactObject outgoingHeader = new ContactObject();
+        outgoingHeader.setAsHeader("My friend requests:");
+        pendingOutgoingList.add(outgoingHeader);
+        pendingIncomingList = new ArrayList<>();
+        ContactObject incomingHeader = new ContactObject();
+        incomingHeader.setAsHeader("Incoming friend requests:");
+        pendingIncomingList.add(incomingHeader);
         blockedList = new ArrayList<>();
         contactsAdapter = new ContactsListAdapter(getActivity(), currentContactsList);
         setListAdapter(contactsAdapter);
@@ -87,12 +100,8 @@ public class FragContacts extends ListFragBase {
 
         mainActivity.friendsTabs.setVisibility(View.VISIBLE);
 
-        if (mainActivity.hasFriendListStored) {
-            makeContactsLists(mainActivity.completeContactsListString);
-            mainActivity.mainProgressBar.setVisibility(View.GONE);
-        } else {
-            new GetRelationsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + "&key=" + mainActivity.master, null, "GET");
-        }
+        //new GetRelationsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + mainActivity.urlKey, null, "GET");
+        new DemoGetRelationsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + mainActivity.urlKey, null, "GET");
 
         mainActivity.friendsTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -112,16 +121,15 @@ public class FragContacts extends ListFragBase {
             }
         });
 
+        //mainActivity.friendsTabs.getTabAt(mainActivity.friendsTabSelected).select();
         switch (mainActivity.friendsTabSelected) {
             case 0:
-                contactsFAB.setVisibility(View.VISIBLE);
                 contactsFAB.setImageResource(R.drawable.ic_add_friend);
                 break;
             case 1:
                 contactsFAB.setImageResource(R.drawable.ic_add_friend);
                 break;
             case 2:
-                contactsFAB.setVisibility(View.VISIBLE);
                 contactsFAB.setImageResource(R.drawable.ic_block_person);
                 break;
         }
@@ -134,12 +142,15 @@ public class FragContacts extends ListFragBase {
         });
     }
 
-    private void openProfile(String uuid) {
+    public static void openProfile(String uuid, MainActivity mainActivity) {
         FragUserInfo fragment = new FragUserInfo();
         fragment.setFriendUUID(uuid);
 
         if (fragment != null) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            mainActivity.previousFragId.add(0, R.integer.display_fragment_user_info_id);
+            mainActivity.onBackUUIDs.add(0, uuid);
+
+            FragmentTransaction ft = mainActivity.getFragmentManager().beginTransaction();
             ft.replace(R.id.MyFrameLayout, fragment);
             mainActivity.friendsTabs.setVisibility(View.GONE);
             ft.commit();
@@ -181,14 +192,14 @@ public class FragContacts extends ListFragBase {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            openProfile(uuid);
+                            openProfile(uuid, mainActivity);
                         } else if (which == 1) {
                             removeFriend(uuid);
                         }
                     }
                 });
                 break;
-            case "FP":
+            case "incomingFP":
                 optionsList = new String[2];
                 optionsList[0] = openProfileOption;
                 optionsList[1] = "Accept friend request";
@@ -196,10 +207,20 @@ public class FragContacts extends ListFragBase {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            openProfile(uuid);
+                            openProfile(uuid, mainActivity);
                         } else if (which == 1) {
                             acceptFriend(uuid);
                         }
+                    }
+                });
+                break;
+            case "FP":
+                optionsList = new String[1];
+                optionsList[0] = "Cancel";
+                contactClickOptionsBuilder.setItems(optionsList, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        removeUserrelation(uuid);
                     }
                 });
                 break;
@@ -215,9 +236,6 @@ public class FragContacts extends ListFragBase {
                     }
                 });
                 break;
-            default:
-                optionsList = new String[1];
-                break;
         }
 
         AlertDialog friendClickOptionsDialog = contactClickOptionsBuilder.create();
@@ -230,6 +248,7 @@ public class FragContacts extends ListFragBase {
         clearContactLists();
         if (jsonString.equals("[]")) {
             failedToLoadText.setText("No contacts found");
+            mainActivity.mainProgressBar.setVisibility(View.GONE);
             notReady = false;
         }
         JSONArray jsonArray;
@@ -258,18 +277,20 @@ public class FragContacts extends ListFragBase {
 
     private void clearContactLists() {
         friendsList.clear();
-        pendingList.clear();
+        pendingOutgoingList.subList(1, pendingOutgoingList.size()).clear();
+        pendingIncomingList.subList(1, pendingIncomingList.size()).clear();
         blockedList.clear();
         contactsAdapter.clear();
     }
 
     private ArrayList<ContactObject> selectContactsList(String relationStatus) {
-        ArrayList<ContactObject> res;
         switch (relationStatus) {
             case "FA":
                 return friendsList;
             case "FP":
-                return pendingList;
+                return pendingOutgoingList;
+            case "incomingFP":
+                return pendingIncomingList;
             case "B":
                 return blockedList;
             default:
@@ -323,11 +344,51 @@ public class FragContacts extends ListFragBase {
         }
     }
 
+    private class DemoGetRelationsAsyncTask extends FGAsyncTask {
+        @Override
+        protected void onPostExecute(String[] response) {
+            try {
+                final JSONArray myRelations = new JSONArray(response[1]);
+
+                RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://fewgamers.com/api/userrelation/?key=" + mainActivity.key + "&user2=" + mainActivity.uuid + "&status=FP", new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.d("relevant relations", myRelations.toString());
+                            JSONArray userTwoPendingRelations = new JSONArray(response);
+                            for (int i = 0; i < userTwoPendingRelations.length(); i++) {
+                                JSONObject incomingPendingRelationObject = userTwoPendingRelations.getJSONObject(i);
+                                String uuid = incomingPendingRelationObject.getString("user1");
+
+                                JSONObject relevantPendingRelationObject = new JSONObject();
+                                relevantPendingRelationObject.put(uuid, "incomingFP");
+                                myRelations.put(relevantPendingRelationObject);
+                            }
+                            makeContactsLists(myRelations.toString());
+                        } catch (JSONException exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Server error", error.toString());
+                    }
+                });
+                requestQueue.add(stringRequest);
+            } catch (JSONException exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
     private class ChangeRelationsAsyncTask extends FGAsyncTask {
         @Override
         protected void onPostExecute(String[] response) {
             if (response[0].equals("201") || response[0].equals("200")) {
-                new GetRelationsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + "&key=" + mainActivity.master, null, "GET");
+                //new GetRelationsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + "&key=" + mainActivity.master, null, "GET");
+                new DemoGetRelationsAsyncTask().execute("https://fewgamers.com/api/userrelation/?user1=" + mainActivity.uuid + mainActivity.urlKey, null, "GET");
             } else if (response[1].equals("{'error': 'unique userdata already exists'}")) {
                 if (mainActivity.friendsTabSelected == 2) {
                     Toast.makeText(getActivity(), "Block already in place", Toast.LENGTH_SHORT).show();
@@ -354,10 +415,14 @@ public class FragContacts extends ListFragBase {
                 mainActivity.friendsTabSelected = 0;
                 break;
             case 1:
-                if (pendingList.size() == 0) {
+                if (pendingOutgoingList.size() + pendingIncomingList.size() == 2) {
                     failedToLoadText.setText("No pending friend requests");
-                } else {
-                    currentContactsList.addAll(pendingList);
+                }
+                if (pendingOutgoingList.size() > 1) {
+                    currentContactsList.addAll(pendingOutgoingList);
+                }
+                if (pendingIncomingList.size() > 1) {
+                    currentContactsList.addAll(pendingIncomingList);
                 }
                 mainActivity.friendsTabSelected = 1;
                 break;
@@ -414,11 +479,12 @@ public class FragContacts extends ListFragBase {
         dialogBuilder.setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                int index = Arrays.asList(allRegisteredUsernames).indexOf(autoComplete.getText().toString());
-                try {
-                    addUserRelation(relationStatus, allRegisteredUUIDs[index]);
-                } catch (ArrayIndexOutOfBoundsException exception) {
-                    Toast.makeText(getActivity(), "User" + autoComplete.getText().toString() + " could not be found.", Toast.LENGTH_SHORT).show();
+                String userIdentifier = autoComplete.getText().toString();
+                String uuid = registeredUUIDsMap.get(userIdentifier);
+                if (uuid == null) {
+                    addUserRelation(relationStatus, userIdentifier);
+                } else {
+                    addUserRelation(relationStatus, uuid);
                 }
             }
         });
@@ -475,31 +541,52 @@ public class FragContacts extends ListFragBase {
     }
 
     private void getAllRegisteredUsers() {
-        contactsQueue.add(new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?key=" + mainActivity.master, new Response.Listener<String>() {
+        contactsQueue.add(new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?key=" + mainActivity.key, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 //Log.d("volley all users", response);
+                ArrayList<String> eligibleEmails = new ArrayList<>();
                 ArrayList<String> eligibleUsernames = new ArrayList<>();
                 ArrayList<String> eligibleUUIDs = new ArrayList<>();
                 int eligibleCount = 0;
+                int eligibleEmailCount = 0;
                 try {
                     JSONArray jsonArray = new JSONArray(response);
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject user = jsonArray.getJSONObject(i);
                         if (user.getString("status").equals("A")) {
+                            String username, uuid;
+                            username = user.getString("nickname");
+                            uuid = user.getString("uuid");
                             eligibleUsernames.add(user.getString("nickname"));
                             eligibleUUIDs.add(user.getString("uuid"));
+                            registeredUUIDsMap.put(username, uuid);
+
+                            try {
+                                String email = user.getString("email");
+                                eligibleEmails.add(email);
+                                registeredUUIDsMap.put(email, uuid);
+                                eligibleEmailCount++;
+                            } catch (JSONException exception) {
+                                Log.d(username, "email private");
+                            }
+
                             eligibleCount++;
                         }
                     }
+                    allRegisteredEmails = new String[eligibleEmailCount];
                     allRegisteredUsernames = new String[eligibleCount];
                     allRegisteredUUIDs = new String[eligibleCount];
-                    for (int j = 0; j < eligibleCount; j++) {
-                        allRegisteredUsernames[j] = eligibleUsernames.get(j);
-                        allRegisteredUUIDs[j] = eligibleUUIDs.get(j);
+                    for (int j = 0; j < eligibleEmailCount; j++) {
+                        allRegisteredEmails[j] = eligibleEmails.get(j);
+                    }
+                    for (int k = 0; k < eligibleCount; k++) {
+                        allRegisteredUsernames[k] = eligibleUsernames.get(k);
+                        allRegisteredUUIDs[k] = eligibleUUIDs.get(k);
                     }
                 } catch (JSONException exception) {
                     Log.e("/api/user/ error", "Could not extract JSONArray of all registered users");
+                    exception.printStackTrace();
                 }
             }
         }, new Response.ErrorListener() {

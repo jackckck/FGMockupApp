@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/serverInfoServerName"
         android:layout_marginStart="@dimen/fivedp"
-        android:layout_toRightOf="@id/serverInfoServerName" />
+        android:layout_toEndOf="@id/serverInfoServerName" />
 
     <TextView
         android:id="@+id/serverInfoIPAddressDisplay"
@@ -71,7 +71,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/serverInfoServerNameDisplay"
-        android:layout_alignTop="@id/serverInfoCreatorUser" />
+        android:layout_alignTop="@id/serverInfoCreatorUser"
+        android:textColor="@color/clickable_color" />
 
     <TextView
         android:id="@+id/serverInfoAdditionalDataDisplay"

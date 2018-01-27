@@ -29,8 +29,19 @@ public class ContactsListAdapter extends ArrayAdapter<ContactObject> {
     public View getView(final int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View resView = inflater.inflate(R.layout.contact_list_item, parent, false);
         final ContactObject thisContact = contactList.get(position);
+        View resView;
+
+        if (thisContact.isAHeader()) {
+            resView = inflater.inflate(R.layout.conctacts_list_header, parent, false);
+            resView.setOnClickListener(null);
+            ((TextView) resView.findViewById(R.id.contactsListHeaderText)).setText(thisContact.getHeader());
+            return resView;
+        }
+
+        resView = inflater.inflate(R.layout.contact_list_item, parent, false);
+
+
         String relationStatus = thisContact.getRelationStatus();
         String accountStatus = thisContact.getAccountStatus();
 

@@ -57,11 +57,18 @@ public class FragServerInfo extends Fragment {
         thisServerAdditionalInfoDisplay = (TextView) getActivity().findViewById(R.id.serverInfoAdditionalDataDisplay);
 
         getCreatorAndSetDisplayTexts();
+
+        thisServerCreatorDisplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragContacts.openProfile(thisCreatorUUID, mainActivity);
+            }
+        });
     }
 
     private void getCreatorAndSetDisplayTexts() {
         RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?uuid=" + thisCreatorUUID + "&key=" + mainActivity.master, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?uuid=" + thisCreatorUUID + mainActivity.urlKey, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d("User", response);

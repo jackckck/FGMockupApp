@@ -8,12 +8,13 @@ import org.json.JSONObject;
  */
 
 public class ServerObject {
-    private String gameUUID, serverName, playerCap, ip, userCreator, additionalInfo;
+    private String gameUUID, serverName, serverUUID, playerCap, ip, userCreator, additionalInfo;
     private Integer maxPlayer;
 
     public void defineServer(JSONObject jsonObject) throws JSONException {
         this.gameUUID = jsonObject.getString("game");
         this.serverName = jsonObject.getString("name");
+        this.serverUUID = jsonObject.getString("uuid");
         this.ip = jsonObject.getString("ip");
         this.userCreator = jsonObject.getString("creator");
         this.additionalInfo = jsonObject.getString("additionaldata");
@@ -54,5 +55,9 @@ public class ServerObject {
 
     public String getCreator() {
         return userCreator;
+    }
+
+    public String getServerUUID() {
+        return serverUUID;
     }
 }

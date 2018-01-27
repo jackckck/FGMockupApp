@@ -22,6 +22,9 @@
     <string name="pref_user_privacy_subscreen_title">Privacy</string>
     <string name="pref_user_privacy_subscreen_key">pref_user_privacy_subscreen_key</string>
 
+    <string name="pref_user_privacy_user_info_visibility_title">Visibility</string>
+    <string name="pref_user_privacy_user_info_visibility_key">user_info_visibility_key</string>
+
     <string name="pref_email_visible_title">Email visible</string>
     <string name="pref_email_visible_summary">Other users can see my email</string>
     <string name="pref_email_visible_key">pref_email_visible_key</string>

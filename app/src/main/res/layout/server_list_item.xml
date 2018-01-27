@@ -14,7 +14,7 @@
         android:layout_height="80dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:src="@mipmap/cs_icon_564" />
+        android:src="@drawable/ic_profile_placeholder" />
 
     <TextView
         android:id="@+id/serverName"

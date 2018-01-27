@@ -34,7 +34,7 @@ public class FGFirebaseMessagingService extends FirebaseMessagingService {
             Log.e("Geen notification", "De payload bevat geen notification");
         }
         try {
-            builder.setSmallIcon(R.mipmap.cs_icon_564);
+            builder.setSmallIcon(R.drawable.ic_stat_name);
         } catch (NullPointerException exception) {
             Log.e("Icon missing", "No icon given in firebase notification");
         }

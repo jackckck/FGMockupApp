@@ -49,16 +49,15 @@ public class PrefChangeUserInfo extends DialogPreference {
                 oldValue = mainActivity.lastName;
                 break;
         }
+        setDialogTitle("Change " + whichValueRead + " " + oldValue + "?");
     }
 
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        TextView oldValueText = (TextView) view.findViewById(R.id.pref_change_user_info_old_value_text);
         newValueEdit = (EditText) view.findViewById(R.id.pref_change_user_info_new_value_edit);
 
-        oldValueText.setText("Old " + whichValueRead + ": " + oldValue);
         newValueEdit.setHint("New " + whichValueRead);
     }
 

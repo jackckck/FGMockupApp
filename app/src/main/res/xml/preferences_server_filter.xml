@@ -6,10 +6,6 @@
         android:summary="@string/pref_servers_filter_subscreen_playercap_summary"
         android:title="@string/pref_servers_filter_subscreen_playercap_title" />
 
-    <CheckBoxPreference
-        android:key="@string/pref_servers_filter_subscreen_hide_full_key"
-        android:title="@string/pref_servers_filter_subscreen_hide_full_title" />
-
     <com.fewgamers.fgmockup.PrefGameFilter
         android:key="@string/pref_servers_filter_subscreen_game_filter_key"
         android:summary="@string/pref_servers_filter_subscreen_game_filter_summary"

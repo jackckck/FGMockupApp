@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -29,6 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +44,8 @@ public class FragServerBrowser extends ListFragBase {
     ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
     FloatingActionButton fab;
 
+    TextView serverBrowserTextView;
+
     ServerListAdapter serverAdapter;
 
     EditText searchBar;
@@ -51,9 +55,7 @@ public class FragServerBrowser extends ListFragBase {
     Boolean isSortedAlphabetically = true;
 
     Integer[] maxPlayerLimits;
-    String[] allowedGames;
-
-    Boolean hideEmpty, hideFull;
+    String[] allowedGameUUIDs;
 
     boolean notReady, gamesFilterActive;
 
@@ -74,6 +76,14 @@ public class FragServerBrowser extends ListFragBase {
         mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
 
         final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+        serverList = new ArrayList<>();
+        serverAdapter = new ServerListAdapter(getActivity(), serverList);
+        setListAdapter(serverAdapter);
+
+        // widgets ophalen
+        searchBar = (EditText) mainActivity.findViewById(R.id.serverSearchBar);
+        filterButton = (ImageButton) mainActivity.findViewById(R.id.serverFilterButton);
+        serverBrowserTextView = (TextView) mainActivity.findViewById(R.id.serverBrowserTextView);
 
         getFilterPreferences();
 
@@ -83,10 +93,6 @@ public class FragServerBrowser extends ListFragBase {
         } else {
             requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.key);
         }
-
-        // alles hieronder is voor buttons en edittexts
-        searchBar = (EditText) mainActivity.findViewById(R.id.serverSearchBar);
-        filterButton = (ImageButton) mainActivity.findViewById(R.id.serverFilterButton);
 
         searchBar.setText(mainActivity.serverSearchFilter);
 
@@ -104,7 +110,6 @@ public class FragServerBrowser extends ListFragBase {
             @Override
             public void afterTextChanged(Editable s) {
                 searchFilter(s.toString().toLowerCase());
-                serverAdapter.notifyDataSetChanged();
             }
         });
 
@@ -151,8 +156,6 @@ public class FragServerBrowser extends ListFragBase {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                serverAdapter.clear();
-                mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
                 requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.key);
             }
         });
@@ -161,12 +164,19 @@ public class FragServerBrowser extends ListFragBase {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        openServerInfo((ServerObject) l.getItemAtPosition(position), mainActivity);
+    }
 
+    public static void openServerInfo(ServerObject serverObject, MainActivity mainActivity) {
         FragServerInfo fragment = new FragServerInfo();
-        fragment.setServer((ServerObject) l.getItemAtPosition(position));
+        fragment.setServer(serverObject);
+
 
         if (fragment != null) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            mainActivity.onBackServerObjects.add(0, serverObject);
+            mainActivity.previousFragId.add(0, R.integer.display_fragment_server_info_id);
+
+            FragmentTransaction ft = mainActivity.getFragmentManager().beginTransaction();
             ft.replace(R.id.MyFrameLayout, fragment);
             ft.commit();
         }
@@ -191,7 +201,7 @@ public class FragServerBrowser extends ListFragBase {
             }
         }
 
-        mainActivity.serverSearchFilter = search;
+        serverAdapter.notifyDataSetChanged();
     }
 
     private void pickSortingMethod() {
@@ -225,6 +235,9 @@ public class FragServerBrowser extends ListFragBase {
     }
 
     private void requestServerList(RequestQueue queue, String url) {
+        serverAdapter.clear();
+        mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
+        serverBrowserTextView.setText("");
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -237,6 +250,8 @@ public class FragServerBrowser extends ListFragBase {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                mainActivity.mainProgressBar.setVisibility(View.GONE);
+                serverBrowserTextView.setText("Unexpected response");
                 Log.e("Server error", error.toString());
             }
         });
@@ -249,19 +264,23 @@ public class FragServerBrowser extends ListFragBase {
 
         serverListAlphabetical = serverListMap.get("Alphabetical");
         serverListByPlayers = serverListMap.get("Numerical");
-        serverList = new ArrayList<>(serverListMap.get("Alphabetical"));
+        serverList.clear();
+        serverList.addAll(serverListAlphabetical);
 
         String search = mainActivity.serverSearchFilter;
         if (search != null) {
             searchFilter(search);
         }
 
-        serverAdapter = new ServerListAdapter(getActivity(), serverList);
-        setListAdapter(serverAdapter);
+        serverAdapter.notifyDataSetChanged();
 
         // laden is voorbij
         mainActivity.mainProgressBar.setVisibility(View.GONE);
         notReady = false;
+
+        if (serverListAlphabetical.size() == 0) {
+            Toast.makeText(getActivity(), "leeg", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private Map<String, ArrayList<ServerObject>> makeServerList(String jsonString) {
@@ -317,7 +336,7 @@ public class FragServerBrowser extends ListFragBase {
     private void getFilterPreferences() {
         maxPlayerLimits = new Integer[2];
 
-        SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+        SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String[] strings = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null-null").split("-");
 
         if (strings[0].equals("null")) {
@@ -331,16 +350,24 @@ public class FragServerBrowser extends ListFragBase {
             maxPlayerLimits[1] = Integer.parseInt(strings[1]);
         }
 
-        hideFull = defaultPreferences.getBoolean(getResources().getString(R.string.pref_servers_filter_subscreen_hide_full_key), false);
+        allowedGameUUIDs = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_game_filter_key), "").split(",,");
 
-        allowedGames = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_game_filter_key), "").split(",,");
-        gamesFilterActive = (allowedGames.length > 0);
+        gamesFilterActive = (allowedGameUUIDs.length > 1);
     }
 
-    private boolean passesFilter(Integer maxPlayer, String game) {
+    private boolean passesFilter(Integer maxPlayer, String gameUUID) {
         if (maxPlayer < maxPlayerLimits[0] || maxPlayerLimits[1] < maxPlayer) {
             return false;
         }
+        if (gamesFilterActive && !Arrays.asList(allowedGameUUIDs).contains(gameUUID)) {
+            return false;
+        }
         return true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mainActivity.serverSearchFilter = searchBar.getText().toString();
     }
 }

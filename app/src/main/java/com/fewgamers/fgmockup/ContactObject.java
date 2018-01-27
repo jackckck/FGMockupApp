@@ -12,6 +12,8 @@ import org.json.JSONObject;
 
 public class ContactObject {
     private String uuid, username, email, firstName, lastName, accountStatus, relationStatus;
+    private boolean isHeader;
+    private String header;
 
     public ContactObject() {
         this.uuid = "";
@@ -31,12 +33,16 @@ public class ContactObject {
                 this.uuid = thisContact.getString("uuid");
                 this.username = thisContact.getString("nickname");
                 this.accountStatus = thisContact.getString("status");
-                if (thisContact.getString("emailprivate").equals("False")) {
+                try {
                     this.email = thisContact.getString("email");
+                } catch (JSONException exception) {
+                    Log.d("email private", this.username + "'s email is private.");
                 }
-                if (thisContact.getString("nameprivate").equals("True")) {
+                try {
                     this.firstName = thisContact.getString("firstname");
                     this.lastName = thisContact.getString("lastname");
+                } catch (JSONException exception) {
+                    Log.d("names private", this.username + "'s first and last name are private.");
                 }
             } catch (JSONException exception) {
                 Log.e("Corrupt friend", "Friend data incomplete");
@@ -44,8 +50,19 @@ public class ContactObject {
         } catch (JSONException exception) {
             Log.e("User string error", "User string could not be formatted to JSONobject");
         }
+    }
 
+    public void setAsHeader(String header) {
+        this.isHeader = true;
+        this.header = header;
+    }
 
+    public boolean isAHeader() {
+        return isHeader;
+    }
+
+    public String getHeader() {
+        return header;
     }
 
     public String getUsername() {

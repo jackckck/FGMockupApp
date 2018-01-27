@@ -14,15 +14,15 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by Administrator on 1/12/2018.
  */
 
 public class PrefGameFilter extends DialogPreference {
-    private String[] allGames, allGamesUUIDs, selectedGames;
-    private String allGamesString;
-    private StringBuilder selectedGameBuilder;
+    private String[] allGames, selectedGamesUUIDs;
+    private StringBuilder selectedGameUUIDsBuilder;
     private LinearLayout selectedGamesLayout, currentRow;
     private MultiAutoCompleteTextView filterAutoComplete;
     private ArrayAdapter<String> filterAdapter;
@@ -38,7 +38,6 @@ public class PrefGameFilter extends DialogPreference {
 
         mainActivity = (MainActivity) c;
         allGames = mainActivity.getAllGamesArray();
-        allGamesUUIDs = mainActivity.getAllGamesUUIDsArray();
 
         setDialogLayoutResource(R.layout.pref_game_filter);
         setPositiveButtonText("Apply");
@@ -51,7 +50,7 @@ public class PrefGameFilter extends DialogPreference {
         context = getContext();
 
         selectedCount = 0;
-        selectedGameBuilder = new StringBuilder("");
+        selectedGameUUIDsBuilder = new StringBuilder("");
 
         filterAutoComplete = (MultiAutoCompleteTextView) view.findViewById(R.id.filtered_games_edit_add);
         filterAdapter = new ArrayAdapter<>(context,
@@ -64,8 +63,7 @@ public class PrefGameFilter extends DialogPreference {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 filterAutoComplete.setText("");
                 String selectedGame = (String) parent.getItemAtPosition(position);
-                addGameText(selectedGame);
-                filterAdapter.remove(selectedGame);
+                addGameText(selectedGame, mainActivity.getGameUUIDFromName(selectedGame));
             }
         });
         selectedGamesLayout = (LinearLayout) view.findViewById(R.id.filtered_games_texts_linear_layout);
@@ -77,27 +75,26 @@ public class PrefGameFilter extends DialogPreference {
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedGameBuilder = new StringBuilder("");
+                selectedGameUUIDsBuilder = new StringBuilder("");
                 selectedGamesLayout.removeAllViews();
                 selectedCount = 0;
-                filterAdapter.clear();
-                filterAdapter.addAll(allGames);
             }
         });
 
-        if (selectedGames != null) {
-            for (String game : selectedGames) {
-                addGameText(game);
+        if (selectedGamesUUIDs != null) {
+            for (String gameUUID : selectedGamesUUIDs) {
+                addGameText(mainActivity.getGameNameFromUUID(gameUUID), gameUUID);
             }
         }
     }
 
-    private void addGameText(String selectedGame) {
-        if (selectedGame.length() == 0) {
+    private void addGameText(String selectedGame, String selectedGameUUID) {
+        if (selectedGame == null || selectedGame.length() == 0) {
             return;
         }
-        selectedGameBuilder.append(",,");
-        selectedGameBuilder.append(selectedGame);
+
+        selectedGameUUIDsBuilder.append(",,");
+        selectedGameUUIDsBuilder.append(selectedGameUUID);
 
         try {
             currentRow.removeView(clearButton);
@@ -129,15 +126,11 @@ public class PrefGameFilter extends DialogPreference {
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
-            String persist = selectedGameBuilder.toString();
-            if (persist.length() > 0) {
-                persist = persist.substring(2);
-            } else {
-            }
+            String persist = selectedGameUUIDsBuilder.toString();
             persistString(persist);
-            selectedGames = persist.split(",,");
+            selectedGamesUUIDs = persist.split(",,");
+
             Log.d("Persisted string", persist);
-        } else {
         }
         super.onDialogClosed(positiveResult);
     }
@@ -146,10 +139,10 @@ public class PrefGameFilter extends DialogPreference {
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
         Log.d("Initial value", "Initial value is called");
         if (restorePersistedValue) {
-            selectedGames = getPersistedString("").split(",,");
+            selectedGamesUUIDs = getPersistedString("").split(",,");
             Log.d("Persisted got", getPersistedString(""));
         } else {
-            selectedGames = new String[allGames.length];
+            selectedGamesUUIDs = new String[allGames.length];
         }
     }
 

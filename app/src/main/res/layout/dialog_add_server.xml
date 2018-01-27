@@ -5,36 +5,36 @@
     android:orientation="vertical">
 
     <EditText
-        android:id="@+id/addServerNameEdit"
+        android:id="@+id/add_server_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
         android:layout_marginTop="@dimen/twentydp"
-        android:ems="7"
+        android:ems="10"
         android:hint="Server name" />
 
     <MultiAutoCompleteTextView
-        android:id="@+id/addServerGameAutoComplete"
+        android:id="@+id/add_server_autocomplete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
-        android:ems="7"
+        android:ems="10"
         android:hint="Game" />
 
     <EditText
-        android:id="@+id/addServerIPEdit"
+        android:id="@+id/add_server_ip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
-        android:ems="7"
+        android:ems="10"
         android:hint="IP" />
 
     <EditText
-        android:id="@+id/addServerPlayerCapEdit"
+        android:id="@+id/add_server_playercap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
-        android:ems="7"
+        android:ems="10"
         android:hint="Max players"
-        android:inputType="number" />
+        />
 </LinearLayout>

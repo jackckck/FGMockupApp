@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity
     public String master;
     public boolean hasServerListStored, hasFriendListStored;
 
-    public String uuid, username, email, firstName, lastName, key, activactionCode, urlKey;
+    public String uuid, username, email, firstName, lastName, key, activationCode, urlKey;
 
     public Integer[] playerCountLimit = new Integer[4];
 
@@ -57,9 +57,14 @@ public class MainActivity extends AppCompatActivity
 
     public int friendsTabSelected, userTabSelected;
 
-    private ArrayList<Integer> previousFragId;
+    public ArrayList<Integer> previousFragId = new ArrayList<>();
+    public ArrayList<String> onBackUUIDs = new ArrayList<>();
+    public ArrayList<ServerObject> onBackServerObjects = new ArrayList<>();
 
     public ProgressBar mainProgressBar;
+
+    ServerObject serverInfoServerObject;
+    String userInfoUUID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         setGamesDataFields();
 
         mainProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.authToolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -96,8 +101,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // de default fragment (bij het opstarten) is home
-        previousFragId.add(0, R.id.nav_home);
-        DisplayFragment(R.id.nav_home);
+        previousFragId.add(0, R.id.nav_server_browser);
+        DisplayFragment(R.id.nav_server_browser);
     }
 
     private void setLoginDatafields() {
@@ -110,11 +115,9 @@ public class MainActivity extends AppCompatActivity
         this.lastName = mainSharedPreferences.getString("lastName", "None");
         this.key = mainSharedPreferences.getString("key", null);
         this.master = getResources().getString(R.string.master);
-        this.activactionCode = mainSharedPreferences.getString("activationCode", null);
+        this.activationCode = mainSharedPreferences.getString("activationCode", null);
 
         this.urlKey = "&key=" + this.key;
-
-        Log.d("mijn uuid", this.uuid);
     }
 
     private void setGamesDataFields() {
@@ -157,7 +160,7 @@ public class MainActivity extends AppCompatActivity
         return allGamesMap.get(uuid);
     }
 
-    public String getGameUUIDFromName(String name) {
+    public String getGameUUIDFromName(String name) throws ArrayIndexOutOfBoundsException {
         int indexOf = Arrays.asList(this.allGamesArray).indexOf(name);
         return allGamesUUIDsArray[indexOf];
     }
@@ -172,11 +175,8 @@ public class MainActivity extends AppCompatActivity
 
         Fragment f = this.getFragmentManager().findFragmentById(R.id.MyFrameLayout);
 
-        if (f instanceof FragServerInfo || f instanceof FragServerBrowserFilter) {
+        if (f instanceof FragServerBrowserFilter) {
             Fragment fragment = new FragServerBrowser();
-            executeFragmentTransaction(fragment);
-        } else if (f instanceof FragUserInfo) {
-            Fragment fragment = new FragContacts();
             executeFragmentTransaction(fragment);
         } else if (previousFragId.size() > 1) {
             previousFragId.remove(0);
@@ -198,30 +198,39 @@ public class MainActivity extends AppCompatActivity
         friendsTabs.setVisibility(View.GONE);
         mainProgressBar.setVisibility(View.GONE);
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
         switch (id) {
-            case R.id.nav_contacts:
-                fragment = new FragContacts();
-                setTabNames("Friends");
-                break;
-            case R.id.nav_home:
-                fragment = new FragHome();
+            case R.id.nav_server_browser:
+                fragment = new FragServerBrowser();
                 break;
             case R.id.nav_profile:
                 fragment = new FragUser();
                 setTabNames("User");
                 break;
-            case R.id.nav_server_browser:
-                fragment = new FragServerBrowser();
+            case R.id.nav_contacts:
+                fragment = new FragContacts();
+                setTabNames("Friends");
                 break;
             case R.id.nav_settings:
                 fragment = new FragPreferences();
                 break;
+            case R.integer.display_fragment_server_info_id:
+                FragServerInfo fragServerInfo = new FragServerInfo();
+                fragServerInfo.setServer(onBackServerObjects.get(0));
+                onBackServerObjects.remove(0);
+                executeFragmentTransaction(fragServerInfo);
+                return;
+            case R.integer.display_fragment_user_info_id:
+                FragUserInfo fragUserInfo = new FragUserInfo();
+                fragUserInfo.setFriendUUID(onBackUUIDs.get(0));
+                onBackUUIDs.remove(0);
+                executeFragmentTransaction(fragUserInfo);
+                return;
         }
 
         executeFragmentTransaction(fragment);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
     }
 
     public void executeFragmentTransaction(Fragment fragment) {
@@ -243,6 +252,7 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
 
         if (id == R.id.action_settings) {
+            friendsTabs.setVisibility(View.GONE);
             fragment = new FragPreferences();
             previousFragId.add(0, R.id.nav_settings);
         } else if (id == R.id.action_logOut) {
