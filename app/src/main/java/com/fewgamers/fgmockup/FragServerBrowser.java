@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -39,17 +38,18 @@ import java.util.Map;
  * Created by Administrator on 12/6/2017.
  */
 
-// hier komt de server browser. momenteel maakt hij al contact met onze server, maar hij levert nog niets zinnigs op
 public class FragServerBrowser extends ListFragBase {
+    // the contents of serverList mirror the content on the user's screen
+    // serverListAlphabetical and serverListByPlayers both contain all registered servers that match the
+    // user's search filters
     ArrayList<ServerObject> serverList, serverListAlphabetical, serverListByPlayers;
-    FloatingActionButton fab;
-
-    TextView serverBrowserTextView;
-
-    ServerListAdapter serverAdapter;
 
     EditText searchBar;
-    ImageButton sortingButton, filterButton;
+    ImageButton sortingButton, advancedFiltersButton;
+    FloatingActionButton refreshFAB;
+    TextView failedToLoadServersText;
+
+    ServerListAdapter serverAdapter;
 
     Boolean sortingDirectionIsDown = true;
     Boolean isSortedAlphabetically = true;
@@ -57,7 +57,7 @@ public class FragServerBrowser extends ListFragBase {
     Integer[] maxPlayerLimits;
     String[] allowedGameUUIDs;
 
-    boolean notReady, gamesFilterActive;
+    boolean gamesFilterActive;
 
     @Nullable
     @Override
@@ -67,35 +67,41 @@ public class FragServerBrowser extends ListFragBase {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        // hier wordt een nieuwe requestview geïnstantieerd als die nog niet bestaat. als hij wel bestaat wordt de bestaande
-        // requestview opgehaald.
         super.onViewCreated(view, savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
-        //begint het laden van de serverlist
+
+        // loading servers begins
         mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
 
-        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
         serverList = new ArrayList<>();
+        serverListAlphabetical = new ArrayList<>();
+        serverListByPlayers = new ArrayList<>();
         serverAdapter = new ServerListAdapter(getActivity(), serverList);
         setListAdapter(serverAdapter);
 
-        // widgets ophalen
+        // retrieving widgets
         searchBar = (EditText) mainActivity.findViewById(R.id.serverSearchBar);
-        filterButton = (ImageButton) mainActivity.findViewById(R.id.serverFilterButton);
-        serverBrowserTextView = (TextView) mainActivity.findViewById(R.id.serverBrowserTextView);
+        sortingButton = (ImageButton) getActivity().findViewById(R.id.sortingButton);
+        advancedFiltersButton = (ImageButton) mainActivity.findViewById(R.id.serverFilterButton);
+        // a textview at the screen's center to indicate errors
+        failedToLoadServersText = (TextView) mainActivity.findViewById(R.id.serverBrowserTextView);
+        refreshFAB = (FloatingActionButton) mainActivity.findViewById(R.id.serverBrowserRefreshFAB);
+
 
         getFilterPreferences();
 
-        //checkt of er al een serverlist gedownload is.
+        // checks for existing serverlist stored in the MainActivity
         if (mainActivity.hasServerListStored) {
-            extractServerListFromJSONString(mainActivity.completeServerListString);
+            extractServerListsFromJSONArray(mainActivity.completeServerListString);
         } else {
-            requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.key);
+            refreshServerList();
         }
 
-        searchBar.setText(mainActivity.serverSearchFilter);
+        // restores the searchbar's previous text value
+        searchBar.setText(mainActivity.serverSearchBarText);
 
+        // calls the server browser's filter method after each change in the searchbar's text
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -113,8 +119,7 @@ public class FragServerBrowser extends ListFragBase {
             }
         });
 
-        sortingButton = (ImageButton) getActivity().findViewById(R.id.sortingButton);
-
+        // changes the sorting direction, indicated by an upward or downward arrow
         sortingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,6 +135,7 @@ public class FragServerBrowser extends ListFragBase {
             }
         });
 
+        // allows sorting by server name and by maximum playercount
         sortingButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -138,7 +144,8 @@ public class FragServerBrowser extends ListFragBase {
             }
         });
 
-        filterButton.setOnClickListener(new View.OnClickListener() {
+        // opens an instance of FragServerBrowserFilter
+        advancedFiltersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragServerBrowserFilter fragment = new FragServerBrowserFilter();
@@ -152,21 +159,23 @@ public class FragServerBrowser extends ListFragBase {
             }
         });
 
-        fab = (FloatingActionButton) mainActivity.findViewById(R.id.serverBrowserRefreshFAB);
-        fab.setOnClickListener(new View.OnClickListener() {
+        // clicking the fab refreshes the server list
+        refreshFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.key);
+                refreshServerList();
             }
         });
     }
 
+    // clicking a server opens a fragment that displays additional information about it
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         openServerInfo((ServerObject) l.getItemAtPosition(position), mainActivity);
     }
 
+    // opens a fragment that displays additional information about a given ServerObject
     public static void openServerInfo(ServerObject serverObject, MainActivity mainActivity) {
         FragServerInfo fragment = new FragServerInfo();
         fragment.setServer(serverObject);
@@ -182,15 +191,15 @@ public class FragServerBrowser extends ListFragBase {
         }
     }
 
+    // filters out any server whose name does not match
     private void searchFilter(String search) {
-        if (notReady) {
-            return;
-        }
+        // takes the complete list of servers, and adds any server that matches the search query
+        // back to the currently displayed servers
         ArrayList<ServerObject> referenceList;
         if (isSortedAlphabetically) {
-            referenceList = new ArrayList<ServerObject>(serverListAlphabetical);
+            referenceList = new ArrayList<>(serverListAlphabetical);
         } else {
-            referenceList = new ArrayList<ServerObject>(serverListByPlayers);
+            referenceList = new ArrayList<>(serverListByPlayers);
         }
 
         serverList.clear();
@@ -201,9 +210,10 @@ public class FragServerBrowser extends ListFragBase {
             }
         }
 
-        serverAdapter.notifyDataSetChanged();
+        updateServerBrowser();
     }
 
+    // shows a dialog that allows a user to choose their sorting method
     private void pickSortingMethod() {
         AlertDialog.Builder sortingBuilder = new AlertDialog.Builder(getActivity());
         sortingBuilder.setTitle("Sort by ...")
@@ -234,10 +244,12 @@ public class FragServerBrowser extends ListFragBase {
         searchFilter(searchBar.getText().toString().toLowerCase());
     }
 
+    // retrieves a JSONArray containing all registered servers, and calls method to extract a server
+    // list from them
     private void requestServerList(RequestQueue queue, String url) {
         serverAdapter.clear();
         mainActivity.mainProgressBar.setVisibility(View.VISIBLE);
-        serverBrowserTextView.setText("");
+        failedToLoadServersText.setText("");
         final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -245,13 +257,13 @@ public class FragServerBrowser extends ListFragBase {
                 mainActivity.hasServerListStored = true;
 
                 Log.d("Server list", response);
-                extractServerListFromJSONString(response);
+                extractServerListsFromJSONArray(response);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 mainActivity.mainProgressBar.setVisibility(View.GONE);
-                serverBrowserTextView.setText("Unexpected response");
+                failedToLoadServersText.setText("Could not retrieve servers");
                 Log.e("Server error", error.toString());
             }
         });
@@ -259,83 +271,117 @@ public class FragServerBrowser extends ListFragBase {
         queue.add(stringRequest);
     }
 
-    private void extractServerListFromJSONString(String jsonString) {
+    // creates the server ArrayLists, and displays them onscreen
+    private void extractServerListsFromJSONArray(String jsonString) {
         Map<String, ArrayList<ServerObject>> serverListMap = makeServerList(jsonString);
 
+        if (serverListMap == null) {
+            failedToLoadServersText.setText("Something went wrong with the retrieved server data");
+            return;
+        }
         serverListAlphabetical = serverListMap.get("Alphabetical");
         serverListByPlayers = serverListMap.get("Numerical");
         serverList.clear();
-        serverList.addAll(serverListAlphabetical);
 
-        String search = mainActivity.serverSearchFilter;
+        // sorting is alphabetical by default
+        serverList.addAll(serverListAlphabetical);
+        
+        String search = mainActivity.serverSearchBarText;
         if (search != null) {
             searchFilter(search);
         }
 
+        // all server lists are ready
+        mainActivity.mainProgressBar.setVisibility(View.GONE);
+
+        updateServerBrowser();
+    }
+
+    // updates the servers displayed onscreen to reflect serverList
+    private void updateServerBrowser() {
         serverAdapter.notifyDataSetChanged();
 
-        // laden is voorbij
-        mainActivity.mainProgressBar.setVisibility(View.GONE);
-        notReady = false;
-
-        if (serverListAlphabetical.size() == 0) {
-            Toast.makeText(getActivity(), "leeg", Toast.LENGTH_SHORT).show();
+        if (serverList.size() == 0) {
+            failedToLoadServersText.setText("No servers to match filter");
+        } else {
+            failedToLoadServersText.setText("");
         }
     }
 
+    // method that returns two complete lists of servers. one is sorted alphabetically, and the other
+    // by the maximum playercount
     private Map<String, ArrayList<ServerObject>> makeServerList(String jsonString) {
-        JSONArray jsonArray = null;
+        JSONArray jsonArray;
         try {
             jsonArray = new JSONArray(jsonString);
         } catch (JSONException exception) {
             Log.e("Server list not found", "Something went wrong when loading server data");
+            exception.printStackTrace();
+            return null;
         }
 
         ArrayList<ServerObject> resAlphabetical = new ArrayList<>();
-        ArrayList<ServerObject> resNumerical = new ArrayList<>();
+        ArrayList<ServerObject> resByPlayer = new ArrayList<>();
 
-        Integer successCounter = 0;
-
+        // Integer that goes up by one every time a server passes through the current filter
+        Integer addedCounter = 0;
+        // a loop that goes by every server in the retrieved JSONArray, and turns it into a
+        // ServerObject if it passes through filter, it is added to both serverListAlphabetical and
+        // serverListByPlayers in its correct position
         for (int i = 0; i < jsonArray.length(); i++) {
             ServerObject serverObject = new ServerObject();
             try {
                 serverObject.defineServer(jsonArray.getJSONObject(i));
             } catch (JSONException exception) {
                 Log.e("Server data missing", "Some property of the server object could not be found inside the JSON string.");
+                exception.printStackTrace();
             }
 
             Integer maxPlayer;
             maxPlayer = serverObject.getMaxPlayer();
             String game = serverObject.getGameUUID();
 
+            // a server is only considered if its max playercount is within bounds, and its game
+            // is not excluded by the games filter
             if (passesFilter(maxPlayer, game)) {
-                Integer j = successCounter - 1;
+                // index of the last element of serverListAlphabetical
+                Integer j = addedCounter - 1;
 
+                // loop that starts at the alphabetical list's last element, and moves downward until
+                // the first element is found whose name comes before the name of the not yet added
+                // ServerObject. that ServerObject is then added just behind the found element
                 while (j > -1 && resAlphabetical.get(j).getServerName().toLowerCase().compareTo(serverObject.getServerName().toLowerCase()) > 0) {
                     j--;
                 }
                 resAlphabetical.add(j + 1, serverObject);
 
-                j = successCounter - 1;
+                // index of the last element of serverListByPlayers
+                j = addedCounter - 1;
 
-                while (j > -1 && resNumerical.get(j).getMaxPlayer() < serverObject.getMaxPlayer()) {
+                // loops downward from serverListByPlayers's last element until the first element is
+                // found whose max playercount is lower than that of the not yet added ServerObject
+                // that ServerObject is then added just behind the found element
+                while (j > -1 && resByPlayer.get(j).getMaxPlayer() < serverObject.getMaxPlayer()) {
                     j--;
                 }
-                resNumerical.add(j + 1, serverObject);
+                resByPlayer.add(j + 1, serverObject);
 
-                successCounter++;
+                addedCounter++;
             }
         }
 
         Map<String, ArrayList<ServerObject>> map = new HashMap<>();
         map.put("Alphabetical", resAlphabetical);
-        map.put("Numerical", resNumerical);
+        map.put("Numerical", resByPlayer);
         return map;
     }
 
+    // sets FragServerBrowser's server filter fields, using the values set in the application's
+    // settings screen
     private void getFilterPreferences() {
         maxPlayerLimits = new Integer[2];
 
+        // preferences set in the app's settings screen
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String[] strings = defaultPreferences.getString(getResources().getString(R.string.pref_servers_filter_subscreen_playercap_key), "null-null").split("-");
 
@@ -345,7 +391,7 @@ public class FragServerBrowser extends ListFragBase {
             maxPlayerLimits[0] = Integer.parseInt(strings[0]);
         }
         if (strings[1].equals("null")) {
-            maxPlayerLimits[1] = 1000;
+            maxPlayerLimits[1] = 9999;
         } else {
             maxPlayerLimits[1] = Integer.parseInt(strings[1]);
         }
@@ -355,6 +401,7 @@ public class FragServerBrowser extends ListFragBase {
         gamesFilterActive = (allowedGameUUIDs.length > 1);
     }
 
+    // returns true of the given values are within the filter's bounds
     private boolean passesFilter(Integer maxPlayer, String gameUUID) {
         if (maxPlayer < maxPlayerLimits[0] || maxPlayerLimits[1] < maxPlayer) {
             return false;
@@ -365,9 +412,16 @@ public class FragServerBrowser extends ListFragBase {
         return true;
     }
 
+    // override that saves the text value in the search bar
     @Override
     public void onStop() {
         super.onStop();
-        mainActivity.serverSearchFilter = searchBar.getText().toString();
+        mainActivity.serverSearchBarText = searchBar.getText().toString();
+    }
+
+    // retrieves fresh server data
+    private void refreshServerList() {
+        final RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
+        requestServerList(requestQueue, "https://www.fewgamers.com/api/server/?key=" + mainActivity.getMyKey());
     }
 }

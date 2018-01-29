@@ -2,11 +2,15 @@
     <string name="app_name">FewGamers</string>
 
     <string name="master">d54e4e7f04284ffb8662be06337cd09f</string>
+    <string name="FGEncrypt_key">"Game er s few123"</string>
+    <string name="FGEncrypt_iv">Fewg am er s1234</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_log_out">Log out</string>
+
     <string name="title_activity_auth">AuthActivity</string>
     <string name="auth_tab_text_1">Login</string>
     <string name="auth_tab_text_2">Register</string>

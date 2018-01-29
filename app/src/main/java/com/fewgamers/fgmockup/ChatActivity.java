@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+// this class is currently not in use, due to the absence of a chat feature in our service
 public class ChatActivity extends ListActivity {
 
     ArrayList<ChatObject> chatList;
@@ -39,8 +40,6 @@ public class ChatActivity extends ListActivity {
     Date chatDate;
 
     Integer previousMonth, previousDay, previousYear;
-
-    ContactObject friend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/serverSearchBar"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_search_black_24dp" />
+        android:src="@drawable/ic_search" />
 
     <ListView
         android:id="@android:id/list"

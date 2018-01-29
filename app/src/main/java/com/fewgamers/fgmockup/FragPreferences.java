@@ -22,7 +22,7 @@ import org.json.JSONObject;
  * Created by Administrator on 12/6/2017.
  */
 
-// de settings fragment. hier zit op het moment alleen nog night mode als werkende setting in
+// fragment for changing user preferences
 public class FragPreferences extends PreferenceFragment {
 
     @Override
@@ -32,6 +32,8 @@ public class FragPreferences extends PreferenceFragment {
         addPreferencesFromResource(R.xml.preferences);
     }
 
+    // when the settings screen is closed, all changed settings pertaining to privacy and notifications
+    // are sent to the FewGamers database
     @Override
     public void onStop() {
         super.onStop();
@@ -48,6 +50,7 @@ public class FragPreferences extends PreferenceFragment {
         blockNotifications(notificationsAreAllowed);
     }
 
+    // changes userdata to reflect the user's email visibility and name visibility
     private void makePrivate(String value, boolean emailIsVisible, boolean nameIsVisible) {
         String emailPrivate, namePrivate, encryptedUserdata;
         FGEncrypt fgEncrypt = new FGEncrypt();
@@ -63,7 +66,7 @@ public class FragPreferences extends PreferenceFragment {
         }
         try {
             JSONObject userdata = new JSONObject();
-            userdata.put("uuid", ((MainActivity) getActivity()).uuid);
+            userdata.put("uuid", ((MainActivity) getActivity()).getMyUuid());
             userdata.put("emailprivate", emailPrivate);
             userdata.put("nameprivate", namePrivate);
             encryptedUserdata = fgEncrypt.encrypt(userdata.toString());
@@ -79,19 +82,21 @@ public class FragPreferences extends PreferenceFragment {
         }
     }
 
+    // if notifications are not allowed, the user's FireBase token will be erased from the FewGamers
+    // database
     private void blockNotifications(boolean allowed) {
         FGEncrypt fgEncrypt = new FGEncrypt();
 
-        String pushkey;
+        String pushKey;
         if (allowed) {
-            pushkey = FirebaseInstanceId.getInstance().getToken();
+            pushKey = FirebaseInstanceId.getInstance().getToken();
         } else {
-            pushkey = "None";
+            pushKey = "None";
         }
         try {
             JSONObject userdata = new JSONObject();
-            userdata.put("uuid", ((MainActivity) getActivity()).uuid);
-            userdata.put("pushkey", pushkey);
+            userdata.put("uuid", ((MainActivity) getActivity()).getMyUuid());
+            userdata.put("pushkey", pushKey);
             String encryptedUserdata = fgEncrypt.encrypt(userdata.toString());
 
             Log.d("userdata unencrypted", userdata.toString());

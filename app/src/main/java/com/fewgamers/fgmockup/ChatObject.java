@@ -13,6 +13,7 @@ import java.util.Date;
  * Created by Administrator on 12/16/2017.
  */
 
+// this class is currently not in use, due to the absence of a chat feature in our service
 public class ChatObject {
     private String date, timeOfDay;
     private String message, user;
@@ -20,8 +21,6 @@ public class ChatObject {
     private boolean isDateNotifier;
 
     public void defineChatObject(String user, String message, String fromMe, String date, String time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
         this.user = user;
         this.message = message;
         this.messageComesFomMe = fromMe;

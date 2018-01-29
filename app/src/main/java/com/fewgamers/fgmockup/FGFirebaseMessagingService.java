@@ -16,12 +16,11 @@ import com.google.firebase.messaging.RemoteMessage;
  * Created by Administrator on 1/20/2018.
  */
 
+// class that handles FireBase messaging
 public class FGFirebaseMessagingService extends FirebaseMessagingService {
+    // override that handles incoming messages, which are to be displayed as notifications
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        // ...
-
-        // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d("Remote message", "From: " + remoteMessage.getFrom());
 
         NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -31,49 +30,28 @@ public class FGFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), channelID);
         if (remoteMessage.getNotification() == null) {
-            Log.e("Geen notification", "De payload bevat geen notification");
+            Log.e("Notification null", "The remote message did not include a notification");
         }
         try {
             builder.setSmallIcon(R.drawable.ic_stat_name);
         } catch (NullPointerException exception) {
-            Log.e("Icon missing", "No icon given in firebase notification");
+            Log.e("Icon null", "No icon included in firebase notification");
         }
         try {
             builder.setContentText(remoteMessage.getNotification().getBody());
         } catch (NullPointerException exception) {
-            Log.e("Body missing", "No body given in firebase notification");
+            Log.e("Body null", "No body included in firebase notification");
         }
         try {
             builder.setContentTitle(remoteMessage.getNotification().getTitle());
         } catch (NullPointerException exception) {
-            Log.e("Title missing", "No title given in firebase notification");
+            Log.e("Title null", "No title included in firebase notification");
         }
+        // android APK >= 26 requires a notifications channel
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH);
             manager.createNotificationChannel(notificationChannel);
         }
         manager.notify(1, builder.build());
-
-        // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
-            Log.d("Remote payload", "Message data payload: " + remoteMessage.getData());
-
-            if (/* Check if data needs to be processed by long running job */ true) {
-                // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
-                //scheduleJob();
-            } else {
-                // Handle message within 10 seconds
-                //handleNow();
-            }
-
-        }
-
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Log.d("Remotee body", "Message Notification Body: " + remoteMessage.getNotification().getBody());
-        }
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
 }

@@ -16,16 +16,17 @@ import org.json.JSONObject;
  * Created by Administrator on 1/20/2018.
  */
 
+// class that updates the FewGamers database with a user's current device token for FireBase
+// notifications
 public class FGFirebaseInstanceIdService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
-        // Get updated InstanceID token.
+        // get updated InstanceID token
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d("Firebase token", "Refreshed token: " + refreshedToken);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
+        // if the token refreshes, and the user is currently logged in (even if the app is not
+        // running), and the user has notifications enabled, the updated token is sent to the server
         SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean notificationsAllowed = defaultPreferences.getBoolean(getResources().getString(R.string.pref_notifications_allow_notifications_key), true);
         SharedPreferences loginSharedPreferences = getApplicationContext().getSharedPreferences("LoginData", Context.MODE_PRIVATE);

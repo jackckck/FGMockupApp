@@ -10,24 +10,21 @@ import org.json.JSONObject;
  * Created by Administrator on 12/14/2017.
  */
 
+// instances of this class are used to represent users in an ArrayList<ContactObject>, which in turn
+// is translated by an instance of ContactsListAdapter to display a ListView of contacts onscreen
 public class ContactObject {
+    // fields for all of a user's userdata
     private String uuid, username, email, firstName, lastName, accountStatus, relationStatus;
+    // used to indicate a special contact object, used to separate incoming and outgoing friend
+    // requests
     private boolean isHeader;
     private String header;
 
-    public ContactObject() {
-        this.uuid = "";
-        this.username = "";
-        this.email = "";
-        this.firstName = "";
-        this.lastName = "";
-        this.accountStatus = "";
-    }
-
-    public void defineContact(String contactString, String relationStatus) {
-        Log.d("contactString", contactString);
+    // constructor that uses a given JSONString containing all non-private userdata to set its fields
+    public ContactObject(String contactString, String relationStatus) {
         this.relationStatus = relationStatus;
         try {
+            // contactString will look like "[{"uuid":uuid, ...}]
             JSONObject thisContact = new JSONArray(contactString).getJSONObject(0);
             try {
                 this.uuid = thisContact.getString("uuid");
@@ -48,7 +45,9 @@ public class ContactObject {
                 Log.e("Corrupt friend", "Friend data incomplete");
             }
         } catch (JSONException exception) {
-            Log.e("User string error", "User string could not be formatted to JSONobject");
+            Log.e("User string error", "User string could not be formatted to JSONObject.");
+        } catch (NullPointerException exception) {
+            Log.d("Header ContactObject", "This ContactObject is a header");
         }
     }
 

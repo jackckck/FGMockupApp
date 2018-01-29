@@ -10,18 +10,21 @@
 
     <ImageView
         android:id="@+id/serverIcon"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="67dp"
+        android:layout_height="67dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/ic_profile_placeholder" />
+        android:layout_marginStart="@dimen/fivedp"
+        android:layout_marginTop="@dimen/fivedp"
+        android:paddingBottom="@dimen/fivedp"
+        android:src="@mipmap/ic_fg_server_icon_white_headphones" />
 
     <TextView
         android:id="@+id/serverName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/serverIcon"
-        android:layout_marginTop="@dimen/fivedp"
+        android:layout_marginStart="5dp"
         android:layout_toEndOf="@id/serverIcon"
         android:textSize="@dimen/server_font_size" />
 
@@ -30,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/serverIcon"
+        android:layout_alignStart="@id/serverName"
         android:layout_marginBottom="@dimen/fivedp"
         android:layout_toEndOf="@id/serverIcon"
         android:textSize="@dimen/server_font_size" />

@@ -23,12 +23,13 @@ import static android.util.Base64.encodeToString;
  * Created by Administrator on 1/10/2018.
  */
 
+// class that is mainly used for encrypting strings by AES
 public class FGEncrypt {
-    SecretKeySpec keySpec;
-    IvParameterSpec ivSpec;
-    Cipher cipher;
+    private SecretKeySpec keySpec;
+    private IvParameterSpec ivSpec;
+    private Cipher cipher;
 
-    public FGEncrypt() {
+    FGEncrypt() {
         String key = "Game er s few123";
         String iv = "Fewg am er s1234";
 
@@ -36,17 +37,16 @@ public class FGEncrypt {
             keySpec = new SecretKeySpec(key.getBytes(), "AES");
             ivSpec = new IvParameterSpec(iv.getBytes());
             cipher = Cipher.getInstance("AES/CBC/NoPadding");
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+        } catch (NoSuchAlgorithmException exception) {
+            exception.printStackTrace();
+        } catch (NoSuchPaddingException exception) {
+            exception.printStackTrace();
         }
     }
 
-    public String encrypt(String string) {
+    String encrypt(String string) {
         String hex = "";
-        StringBuilder builder = new StringBuilder();
-        builder.append(string);
+        StringBuilder builder = new StringBuilder(string);
 
         try {
             char paddingChar = Character.UNASSIGNED;
@@ -54,13 +54,12 @@ public class FGEncrypt {
             int x = string.length() % size;
             int padLength = size - x;
             for (int i = 0; i < padLength; i++) {
-                string += paddingChar;
                 builder.append(paddingChar);
             }
 
             byte[] res;
             cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
-            res = cipher.doFinal(string.getBytes());
+            res = cipher.doFinal(builder.toString().getBytes());
             for (int i = 0; i < res.length; i++) {
                 System.out.print(res[i] + ", ");
             }
@@ -90,7 +89,9 @@ public class FGEncrypt {
         return new String(hexChars);
     }
 
-    public String getFinalQuery(String encryptedUserdata, String master) {
+    // this method will create a JSONObject string out of two given strings, according to a format
+    // often used to communicate with https://fewgamers.com
+    String getFinalQuery(String encryptedUserdata, String master) {
         String res = null;
         try {
             JSONObject finalQuery = new JSONObject();

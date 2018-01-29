@@ -18,6 +18,7 @@ import java.util.ArrayList;
  * Created by Administrator on 12/16/2017.
  */
 
+// this class is currently not in use, due to the absence of a chat feature in our service
 public class ChatAdapter extends ArrayAdapter<ChatObject> {
     Context context;
     private ArrayList<ChatObject> chatList;

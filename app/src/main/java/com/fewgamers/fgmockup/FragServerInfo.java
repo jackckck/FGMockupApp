@@ -22,6 +22,7 @@ import org.json.JSONObject;
  * Created by Administrator on 12/19/2017.
  */
 
+// fragment that displays all available information on a server
 public class FragServerInfo extends Fragment {
 
     MainActivity mainActivity;
@@ -50,6 +51,7 @@ public class FragServerInfo extends Fragment {
         mainActivity = (MainActivity) getActivity();
         this.thisGame = mainActivity.getGameNameFromUUID(this.thisGameUUID);
 
+        // retrieving widgets
         thisGameDisplay = (TextView) getActivity().findViewById(R.id.serverInfoGameDisplay);
         thisServerNameDisplay = (TextView) getActivity().findViewById(R.id.serverInfoServerNameDisplay);
         thisServerIPDisplay = (TextView) getActivity().findViewById(R.id.serverInfoIPAddressDisplay);
@@ -58,6 +60,7 @@ public class FragServerInfo extends Fragment {
 
         getCreatorAndSetDisplayTexts();
 
+        // clicking the creator's username will open that user's profile
         thisServerCreatorDisplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,9 +69,11 @@ public class FragServerInfo extends Fragment {
         });
     }
 
+    // the creator's username needs to be retrieved first from their uuid. the method to fill out all
+    // informative TextViews is then called
     private void getCreatorAndSetDisplayTexts() {
         RequestQueue requestQueue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?uuid=" + thisCreatorUUID + mainActivity.urlKey, new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "https://fewgamers.com/api/user/?uuid=" + thisCreatorUUID + "&key=" + mainActivity.getMyKey(), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d("User", response);

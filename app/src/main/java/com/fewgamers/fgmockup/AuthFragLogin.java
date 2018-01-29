@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -38,16 +39,19 @@ import static android.util.Base64.*;
  */
 
 
-// Fragment voor login
+// fragment that allows a user to log in
 public class AuthFragLogin extends android.support.v4.app.Fragment {
     EditText emailEdit, passEdit;
     Button loginButton;
     ImageButton visibilityButton;
+    TextView loginErrorNotifier;
+
     Boolean passwordIsVisible;
 
     SharedPreferences loginSharedPreferences;
     SharedPreferences.Editor loginEditor;
 
+    // checks whether a user has previously logged in without logging out
     private boolean isLoggedIn() {
         return loginSharedPreferences.getBoolean("isLoggedIn", false);
     }
@@ -62,26 +66,27 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // create an editor to store the user's login data after a successful login
         loginSharedPreferences = getActivity().getSharedPreferences("LoginData", Context.MODE_PRIVATE);
         loginEditor = loginSharedPreferences.edit();
         loginEditor.apply();
 
-        // stay logged in
+        // allows a user to stay logged in
         if (isLoggedIn()) {
             allowAccessToMain();
         }
 
-        // Instantiëren van widgets
+        // retrieve widgets
         emailEdit = (EditText) getActivity().findViewById(R.id.loginEmail);
         passEdit = (EditText) getActivity().findViewById(R.id.loginPass);
         loginButton = (Button) getActivity().findViewById(R.id.loginButton);
         visibilityButton = (ImageButton) getActivity().findViewById(R.id.passwordVisibilityButton);
-        emailEdit.setText("");
-        passEdit.setText("");
+        loginErrorNotifier = (TextView) getActivity().findViewById(R.id.loginErrorNotifier);
 
-        // per default is password onzichtbaar
+        // password will be invisible by default
         passwordIsVisible = false;
 
+        // checks whether the filled out login data is valid
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,24 +94,33 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
             }
         });
 
+        // button that controls the password's visibility
         visibilityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (passwordIsVisible) {
                     passwordIsVisible = false;
                     visibilityButton.setImageResource(R.drawable.ic_login_visibility_off);
+                    // makes password text illegible
                     passEdit.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 } else {
                     passwordIsVisible = true;
                     visibilityButton.setImageResource(R.drawable.ic_login_visibility);
+                    // makes password text legible
                     passEdit.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                 }
             }
         });
     }
 
+    // sends the given email-password combination to the FewGamers server. when a response indicating
+    // a successful login is received, the user is moved to an instance of MainActivity
     private void checkLogin(String email, String pass) {
-        Log.d("token", FirebaseInstanceId.getInstance().getToken());
+        if (email.equals("") || pass.equals("")) {
+            loginErrorNotifier.setText("Required field missing");
+            return;
+        }
+
         String loginDataString, encryptedLoginDataString;
         JSONObject loginData = new JSONObject();
         JSONObject finalLogin = new JSONObject();
@@ -118,9 +132,8 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
             e.printStackTrace();
         }
 
-        // json string in de vorm {"email":email,"password":pass"}
+        // logindata will look like this: {"email":email,"password":pass}
         loginDataString = loginData.toString();
-
 
         FGEncrypt encryptor = new FGEncrypt();
         encryptedLoginDataString = encryptor.encrypt(loginDataString);
@@ -133,22 +146,24 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
 
         Log.d("final login", finalLogin.toString());
 
-        // json string in de vorm {"logindata":encrypted logindata}
+        // the user's final login will look like: {"logindata":encrypted logindata}
         new LoginAsyncTask().execute("https://fewgamers.com/api/login/", finalLogin.toString(), "POST");
     }
 
-    // brengt de gebruiker naar de mainactivity
+    // opens an instance of MainActivity
     private void allowAccessToMain() {
         Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
         getActivity().finish();
     }
 
-    // uitbreiding van FGAsyncTask, zodat de verkregen accountinformatie kan worden opgeslagen in sharedpreferences
+    // extension of FGAsyncTask, that stores the received login data in SharedPreferences
     private class LoginAsyncTask extends FGAsyncTask {
         @Override
         protected void onPostExecute(String[] response) {
             try {
+                // response met alle gebruikersdata. {"uuid":uuid,"email":email,"nickname":username,
+                // "firstname":firstName,"lastname":lastName,"key":key,"activationcode":activationCode}
                 JSONObject jsonObject = new JSONObject(response[1]);
 
                 // slaat alle accountinformatie op in sharedpreferences
@@ -161,16 +176,22 @@ public class AuthFragLogin extends android.support.v4.app.Fragment {
                 loginEditor.putString("key", jsonObject.getString("key"));
                 loginEditor.putString("activationCode", jsonObject.getString("activationcode"));
 
+                // zorgt dat de gebruiker ingelogd blijft
                 // wordt weer false wanneer de gebruiker uitlogt
                 loginEditor.putBoolean("isLoggedIn", true);
 
                 loginEditor.apply();
 
+                // updatet de firebase token van de ingelogde user in de database
+                // de server kan van d.m.v. deze token dit apparaat rechtstreeks een notification sturen
                 FGFirebaseInstanceIdService.sendRegistrationToServer(uuid, FirebaseInstanceId.getInstance().getToken(),
                         getResources().getString(R.string.master));
+
+                // stuurt de gebruiker door naar de main activity
                 allowAccessToMain();
             } catch (JSONException exception) {
-                Log.e("Incorrect user data", "Retrieved user login data was incomplete");
+                loginErrorNotifier.setText("Could not log in with what was entered");
+                exception.printStackTrace();
             }
 
         }

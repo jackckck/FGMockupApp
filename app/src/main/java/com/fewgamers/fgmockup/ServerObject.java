@@ -7,7 +7,10 @@ import org.json.JSONObject;
  * Created by Administrator on 12/14/2017.
  */
 
+// instances of this class are used to represent users in an ArrayList<ServerObject>, which in turn
+// is translate by an instance of ContactsListAdapter to display a ListView of contacts onscreen
 public class ServerObject {
+    // fields for all of a server's information
     private String gameUUID, serverName, serverUUID, playerCap, ip, userCreator, additionalInfo;
     private Integer maxPlayer;
 
@@ -29,35 +32,35 @@ public class ServerObject {
         }
     }
 
-    public String getGameUUID() {
+    String getGameUUID() {
         return gameUUID;
     }
 
-    public String getServerName() {
+    String getServerName() {
         return serverName;
     }
 
-    public String getPlayerCap() {
+    String getPlayerCap() {
         return playerCap;
     }
 
-    public Integer getMaxPlayer() {
+    Integer getMaxPlayer() {
         return maxPlayer;
     }
 
-    public String getAdditionalInfo() {
+    String getAdditionalInfo() {
         return additionalInfo;
     }
 
-    public String getIp() {
+    String getIp() {
         return ip;
     }
 
-    public String getCreator() {
+    String getCreator() {
         return userCreator;
     }
 
-    public String getServerUUID() {
+    String getServerUUID() {
         return serverUUID;
     }
 }

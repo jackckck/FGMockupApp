@@ -1,6 +1,7 @@
 package com.fewgamers.fgmockup;
 
 import android.content.Context;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -9,32 +10,30 @@ import com.android.volley.toolbox.Volley;
  * Created by Administrator on 12/11/2017.
  */
 
-// singletons zijn klassen die maar één instantie horen te hebben in de gehele applicatie. van onze requestfeed hebben we maar één nodig
+// throughout the applications runtime, only one RequestQueue for Volley requests is required. by
+// calling the getInstance().getRequestQueue() static method from this singleton class, only one
+// RequestQueue instance will ever exist
 public class RequestSingleton {
-    private static RequestSingleton mInstance;
-    private RequestQueue mRequestQueue;
-    private static Context mCtx;
+    private static RequestSingleton myInstance;
+    private RequestQueue myRequestQueue;
+    private static Context myContext;
 
     private RequestSingleton(Context context) {
-        mCtx = context;
-        mRequestQueue = getRequestQueue();
+        myContext = context;
+        myRequestQueue = getRequestQueue();
     }
 
     public static synchronized RequestSingleton getInstance(Context context) {
-        if (mInstance == null) {
-            mInstance = new RequestSingleton(context);
+        if (myInstance == null) {
+            myInstance = new RequestSingleton(context);
         }
-        return mInstance;
+        return myInstance;
     }
 
     public RequestQueue getRequestQueue() {
-        if (mRequestQueue == null) {
-            mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
+        if (myRequestQueue == null) {
+            myRequestQueue = Volley.newRequestQueue(myContext.getApplicationContext());
         }
-        return mRequestQueue;
-    }
-
-    public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+        return myRequestQueue;
     }
 }

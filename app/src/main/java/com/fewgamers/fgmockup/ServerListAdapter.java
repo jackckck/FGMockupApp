@@ -16,17 +16,21 @@ import java.util.Map;
  * Created by Administrator on 12/14/2017.
  */
 
+// this class translates an ArrayList<ServerObject> to a visual display of a servers list
 public class ServerListAdapter extends ArrayAdapter<ServerObject> {
     private final MainActivity mainActivityContext;
     private final ArrayList<ServerObject> serverList;
 
-    public ServerListAdapter(Activity context, ArrayList<ServerObject> serverList) {
+    // constructor that passes on the Activity's context, and the list from which a ListView is
+    // populated
+    ServerListAdapter(Activity context, ArrayList<ServerObject> serverList) {
         super(context, R.layout.server_list_item, serverList);
 
         this.mainActivityContext = (MainActivity) context;
         this.serverList = serverList;
     }
 
+    // method in which the fields of a ServerObject are added to a ListView item
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mainActivityContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -54,6 +58,7 @@ public class ServerListAdapter extends ArrayAdapter<ServerObject> {
         return resView;
     }
 
+    // limits overly long server names to fit the user's screen
     private String limitString(String string, int limit) {
         String res = string;
         if (res.length() > limit) {

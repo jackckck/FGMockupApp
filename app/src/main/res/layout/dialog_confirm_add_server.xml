@@ -6,32 +6,32 @@
     android:paddingVertical="@dimen/tendp">
 
     <TextView
-        android:id="@+id/confirmAddServerName"
+        android:id="@+id/confirm_add_server_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
         android:layout_marginTop="@dimen/tendp" />
 
     <TextView
-        android:id="@+id/confirmAddServerGame"
+        android:id="@+id/confirm_add_server_game"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp" />
 
     <TextView
-        android:id="@+id/confirmAddServerIP"
+        android:id="@+id/confirm_add_server_ip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp" />
 
     <TextView
-        android:id="@+id/confirmAddServerPlayerCount"
+        android:id="@+id/confirm_add_server_playercount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp" />
 
     <EditText
-        android:id="@+id/confirmAddServerAdditionalDataEdit"
+        android:id="@+id/confirm_add_server_additionaldata"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/twentydp"
