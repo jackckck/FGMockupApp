@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "692363137024",
+    "firebase_url": "https://fgmockup.firebaseio.com",
+    "project_id": "fgmockup",
+    "storage_bucket": "fgmockup.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692363137024:android:d1174eb2a2824579",
+        "android_client_info": {
+          "package_name": "com.fewgamers.fgmockup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "692363137024-ps8f7go4gju0sh7bsm92b6katt27fn3r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fewgamers.fgmockup",
+            "certificate_hash": "1551be9474a25a060dfa75b94db6f075665d56b3"
+          }
+        },
+        {
+          "client_id": "692363137024-hjsevm8di18687mo0iiveo3sjsse21s0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb0rtV-mNvIREvAjHEZxryeUobW6UhVQ4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "692363137024-hjsevm8di18687mo0iiveo3sjsse21s0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
