@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.fewgamers.fgmockup.PrefPlayerCount
+    <com.fewgamers.fewgamers.PrefPlayerCount
         android:defaultValue="null-null"
         android:key="@string/pref_servers_filter_subscreen_playercap_key"
         android:summary="@string/pref_servers_filter_subscreen_playercap_summary"
         android:title="@string/pref_servers_filter_subscreen_playercap_title" />
 
-    <com.fewgamers.fgmockup.PrefGameFilter
+    <com.fewgamers.fewgamers.PrefGameFilter
         android:key="@string/pref_servers_filter_subscreen_game_filter_key"
         android:summary="@string/pref_servers_filter_subscreen_game_filter_summary"
         android:title="@string/pref_servers_filter_subscreen_game_filter_title" />

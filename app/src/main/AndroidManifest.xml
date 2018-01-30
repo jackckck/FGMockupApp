@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fewgamers.fgmockup">
+    package="com.fewgamers.fewgamers">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -12,12 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="MainActivity"
+            android:name="com.fewgamers.fewgamers.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ChatActivity" />
+        <activity android:name="com.fewgamers.fewgamers.ChatActivity" />
         <activity
-            android:name=".AuthActivity"
+            android:name="com.fewgamers.fewgamers.AuthActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
 
@@ -28,12 +28,12 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".FGFirebaseMessagingService">
+        <service android:name="com.fewgamers.fewgamers.FGFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".FGFirebaseInstanceIdService">
+        <service android:name="com.fewgamers.fewgamers.FGFirebaseInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>

@@ -29,16 +29,16 @@
             android:key="@string/pref_user_account_subscreen_key"
             android:title="@string/pref_user_account_subscreen_title">
 
-            <com.fewgamers.fgmockup.PrefChangeUserInfo
+            <com.fewgamers.fewgamers.PrefChangeUserInfo
                 android:key="@string/pref_user_change_email_key"
                 android:title="@string/pref_user_change_email_title" />
-            <com.fewgamers.fgmockup.PrefChangeUserInfo
+            <com.fewgamers.fewgamers.PrefChangeUserInfo
                 android:key="@string/pref_user_change_username_key"
                 android:title="@string/pref_user_change_username_title" />
-            <com.fewgamers.fgmockup.PrefChangeUserInfo
+            <com.fewgamers.fewgamers.PrefChangeUserInfo
                 android:key="@string/pref_user_change_firstname_key"
                 android:title="@string/pref_user_change_firstname_title" />
-            <com.fewgamers.fgmockup.PrefChangeUserInfo
+            <com.fewgamers.fewgamers.PrefChangeUserInfo
                 android:key="@string/pref_user_change_lastname_key"
                 android:title="@string/pref_user_change_lastname_title" />
         </PreferenceScreen>
@@ -53,13 +53,13 @@
             android:persistent="false"
             android:title="@string/pref_servers_filter_subscreen_title">
 
-            <com.fewgamers.fgmockup.PrefPlayerCount
+            <com.fewgamers.fewgamers.PrefPlayerCount
                 android:defaultValue="null-null"
                 android:key="@string/pref_servers_filter_subscreen_playercap_key"
                 android:summary="@string/pref_servers_filter_subscreen_playercap_summary"
                 android:title="@string/pref_servers_filter_subscreen_playercap_title" />
 
-            <com.fewgamers.fgmockup.PrefGameFilter
+            <com.fewgamers.fewgamers.PrefGameFilter
                 android:key="@string/pref_servers_filter_subscreen_game_filter_key"
                 android:summary="@string/pref_servers_filter_subscreen_game_filter_summary"
                 android:title="@string/pref_servers_filter_subscreen_game_filter_title" />
