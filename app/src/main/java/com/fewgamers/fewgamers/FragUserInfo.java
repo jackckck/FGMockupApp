@@ -96,7 +96,8 @@ public class FragUserInfo extends ListFragment {
 
         // all missing fields are inticated as private
         for (int i = 0; i < 4; i++) {
-            if (displayTexts[i].equals("")) {
+            Log.d("int i", ((Integer) i).toString());
+            if (displayTexts[i] == null || displayTexts[i].equals("")) {
                 displayTexts[i] = "Private";
             }
         }

@@ -376,7 +376,13 @@ public class FragUser extends ListFragBase {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String additionalData = ((EditText) dialogView.findViewById(R.id.confirm_add_server_additionaldata)).getText().toString();
-                addServer(name, mainActivity.getGameUUIDFromName(game), ip, Integer.parseInt(playerCap), additionalData);
+                Integer playerCapInteger = null;
+                try {
+                    playerCapInteger = Integer.parseInt(playerCap);
+                } catch (NumberFormatException exception) {
+                    exception.printStackTrace();
+                }
+                addServer(name, mainActivity.getGameUUIDFromName(game), ip, playerCapInteger, additionalData);
             }
         });
         addServerConfirmDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -402,7 +408,7 @@ public class FragUser extends ListFragBase {
             userdata.put("game", gameUUID);
             userdata.put("ip", ip);
             userdata.put("creator", mainActivity.getMyUuid());
-            if (playerCap.equals("")) {
+            if (playerCap == null) {
                 userdata.put("playercount", "None");
             } else {
                 userdata.put("playercount", playerCap);

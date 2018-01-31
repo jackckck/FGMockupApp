@@ -33,16 +33,22 @@ public class ContactObject {
                 try {
                     this.email = thisContact.getString("email");
                 } catch (JSONException exception) {
+                    this.email = "private";
                     Log.d("email private", this.username + "'s email is private.");
+                    exception.printStackTrace();
                 }
                 try {
                     this.firstName = thisContact.getString("firstname");
                     this.lastName = thisContact.getString("lastname");
                 } catch (JSONException exception) {
+                    this.firstName = "private";
+                    this.lastName = "private";
                     Log.d("names private", this.username + "'s first and last name are private.");
+                    exception.printStackTrace();
                 }
             } catch (JSONException exception) {
                 Log.e("Corrupt friend", "Friend data incomplete");
+                exception.printStackTrace();
             }
         } catch (JSONException exception) {
             Log.e("User string error", "User string could not be formatted to JSONObject.");
